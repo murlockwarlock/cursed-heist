@@ -19,7 +19,7 @@ msgid "HEAT_LABEL"
 msgstr "ЖАР %d%%"
 
 msgid "CONTROLS_HINT"
-msgstr "P1 WASD·E·Q·F    P2 СТРЕЛКИ·ENTER·SHIFT·CTRL    P3 IJKL·O·U·P    P4 Z X C V·B·N·M"
+msgstr "WASD ДВИЖЕНИЕ · МЫШЬ КАМЕРА · SPACE ПРЫЖОК · ЛКМ ТОЛЧОК · ПКМ АРТЕФАКТ · F ЭМОЦИЯ · ESC КУРСОР"
 
 msgid "WINNER_LABEL"
 msgstr "%s ПОБЕДИЛ"
