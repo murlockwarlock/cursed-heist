@@ -44,6 +44,10 @@ func _run() -> void:
 	if target.slowed_seconds <= 0.0:
 		await _fail("Foam sprayer did not slow its target")
 		return
+	target.add_curse(CurseCatalog.HEAVY, 5.0)
+	if not is_equal_approx(target.movement_speed_multiplier(), HeistPlayer.FOAM_SPEED_FACTOR):
+		await _fail("Movement slows stacked below the strongest active effect")
+		return
 	print("Weapons: baton, blunderbuss and foam sprayer verified")
 	for frame: int in range(20):
 		await physics_frame

@@ -60,7 +60,7 @@ func _on_shove_requested(player: HeistPlayer) -> void:
 		target.apply_impact(offset, definition["force"] * falloff)
 		target.take_damage(definition["damage"] * falloff)
 		if player.weapon_id == WeaponCatalog.FOAM_SPRAYER:
-			target.apply_slow(5.0)
+			target.apply_slow(3.5)
 		recorder.increment(player, &"shoves")
 		recorder.increment(player, &"weapon_hits")
 		recorder.record(player.weapon_id, player, target)

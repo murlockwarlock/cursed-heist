@@ -123,6 +123,12 @@ msgstr "МУЗЕЙНЫЙ МУШКЕТОН"
 msgid "WEAPON_FOAM_SPRAYER"
 msgstr "РЕСТАВРАЦИОННАЯ ПЕНА"
 
+msgid "STATUS_FOAMED"
+msgstr "В ПЕНЕ · %d С"
+
+msgid "STATUS_STAGGERED"
+msgstr "ПОШАТНУЛСЯ"
+
 msgid "OBJECTIVE_FIND_ARTIFACT"
 msgstr "НАЙДИ ЖИВОЙ АРТЕФАКТ"
 

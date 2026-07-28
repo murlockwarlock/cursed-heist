@@ -15,6 +15,10 @@ const KEY_PROFILES: Array[Dictionary] = [
 	{"up": KEY_I, "down": KEY_K, "left": KEY_J, "right": KEY_L, "interact": KEY_O, "shove": KEY_U, "emote": KEY_P},
 	{"up": KEY_C, "down": KEY_X, "left": KEY_Z, "right": KEY_V, "interact": KEY_B, "shove": KEY_N, "emote": KEY_M}
 ]
+const HIT_CONTROL_FACTOR := 0.28
+const HEAVY_SPEED_FACTOR := 0.72
+const DANCE_FEVER_SPEED_FACTOR := 0.58
+const FOAM_SPEED_FACTOR := 0.64
 
 var player_index := 0
 var player_name := ""
@@ -102,13 +106,13 @@ func _physics_process(delta: float) -> void:
 		_clamp_to_arena()
 		return
 	if stun_seconds > 0.0:
-		input_vector = Vector3.ZERO
+		input_vector *= HIT_CONTROL_FACTOR
 	if emote_name == &"dance" and emote_seconds > 0.0:
 		input_vector *= 0.32
 	if input_vector.length_squared() > 0.01:
 		facing = input_vector.normalized()
 		visual.rotation.y = lerp_angle(visual.rotation.y, atan2(-facing.x, -facing.z), delta * 12.0)
-	var speed_multiplier := _speed_multiplier()
+	var speed_multiplier := movement_speed_multiplier()
 	var horizontal := Vector3(velocity.x, 0.0, velocity.z)
 	horizontal = horizontal.move_toward(input_vector * GameConstants.PLAYER_SPEED * speed_multiplier, GameConstants.PLAYER_ACCELERATION * delta)
 	velocity.x = horizontal.x
@@ -165,7 +169,7 @@ func apply_shove(direction: Vector3) -> void:
 func apply_impact(direction: Vector3, force: float) -> void:
 	var horizontal := Vector3(direction.x, 0.0, direction.z).normalized()
 	velocity += horizontal * force + Vector3.UP * minf(force * 0.32, 3.8)
-	stun_seconds = 0.22
+	stun_seconds = 0.14
 
 func apply_slow(seconds: float) -> void:
 	slowed_seconds = maxf(slowed_seconds, seconds)
@@ -250,17 +254,16 @@ func _tick_curses(delta: float) -> void:
 	if not expired.is_empty():
 		curses_changed.emit(self)
 
-func _speed_multiplier() -> float:
-	var multiplier := 1.0
+func movement_speed_multiplier() -> float:
+	var slow_factor := 1.0
 	if has_curse(CurseCatalog.HEAVY):
-		multiplier *= 0.72
-	if has_curse(CurseCatalog.GREED):
-		multiplier *= clampf(1.0 + score * 0.007, 1.0, 1.32)
+		slow_factor = minf(slow_factor, HEAVY_SPEED_FACTOR)
 	if has_curse(CurseCatalog.DANCE_FEVER) and dance_grace <= 0.0:
-		multiplier *= 0.48
+		slow_factor = minf(slow_factor, DANCE_FEVER_SPEED_FACTOR)
 	if slowed_seconds > 0.0:
-		multiplier *= 0.56
-	return multiplier
+		slow_factor = minf(slow_factor, FOAM_SPEED_FACTOR)
+	var speed_bonus := clampf(1.0 + score * 0.007, 1.0, 1.32) if has_curse(CurseCatalog.GREED) else 1.0
+	return slow_factor * speed_bonus
 
 func _build_visual() -> void:
 	visual = HeistCharacterVisual.new()

@@ -57,7 +57,11 @@ func update_player(player: HeistPlayer) -> void:
 	var curse_names: Array[String] = []
 	for id: StringName in player.active_curses:
 		curse_names.append(CurseCatalog.title(id))
+	if player.slowed_seconds > 0.0:
+		curse_names.append(tr(&"STATUS_FOAMED") % ceili(player.slowed_seconds))
+	if player.stun_seconds > 0.0:
+		curse_names.append(tr(&"STATUS_STAGGERED"))
 	var life_state := tr(&"GHOST_LABEL") if player.is_ghost else tr(&"HEALTH_LABEL") % int(player.health)
-	detail_label.text = "%s    %s" % [life_state, " · ".join(curse_names)]
+	detail_label.text = life_state if curse_names.is_empty() else "%s    %s" % [life_state, " · ".join(curse_names)]
 	weapon_label.text = "%s  ·  %s" % [tr(&"WEAPON_LABEL"), WeaponCatalog.title(player.weapon_id)]
 	weapon_label.add_theme_color_override("font_color", WeaponCatalog.definition(player.weapon_id)["color"])

@@ -65,7 +65,6 @@ func _build_zone_floors() -> void:
 	for room: Dictionary in MuseumLayout.ROOMS:
 		_create_box(String(room["key"]), room["size"], room["position"], room["color"], false, 0.1)
 		_create_room_border(room)
-		_create_room_label(room)
 	for z: float in [-2.4, 0.0, 2.4]:
 		_create_box("MainRunner", Vector3(78.0, 0.035, 1.65), Vector3(0.0, 0.115, z), Color("4b285e"), false, 0.05)
 	for x: float in [-36.0, -32.0, -28.0]:
@@ -79,17 +78,6 @@ func _create_room_border(room: Dictionary) -> void:
 	_create_box("RoomEdge", Vector3(size.x, 0.035, 0.12), position + Vector3(0.0, 0.12, size.z * 0.5), color, false, 0.38)
 	_create_box("RoomEdge", Vector3(0.12, 0.035, size.z), position + Vector3(-size.x * 0.5, 0.12, 0.0), color, false, 0.38)
 	_create_box("RoomEdge", Vector3(0.12, 0.035, size.z), position + Vector3(size.x * 0.5, 0.12, 0.0), color, false, 0.38)
-
-func _create_room_label(room: Dictionary) -> void:
-	var label := Label3D.new()
-	label.text = tr(room["key"])
-	label.position = room["position"] + Vector3(0.0, 0.16, 0.0)
-	label.rotation.x = -PI * 0.5
-	label.font_size = 72
-	label.pixel_size = 0.008
-	label.modulate = Color(room["light"], 0.72)
-	label.outline_size = 10
-	add_child(label)
 
 func _build_room_partitions() -> void:
 	_build_horizontal_partition(-8.0)
