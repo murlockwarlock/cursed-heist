@@ -12,6 +12,8 @@ func configure(player_count: int) -> void:
 			"catches": 0,
 			"throws": 0,
 			"chests": 0,
+			"weapon_hits": 0,
+			"voids": 0,
 			"shoves": 0,
 			"emotes": 0,
 			"curses": 0,

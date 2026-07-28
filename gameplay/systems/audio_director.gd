@@ -28,6 +28,15 @@ func play(id: StringName, pitch: float = 1.0) -> void:
 	audio_player.pitch_scale = pitch
 	audio_player.play()
 
+func _exit_tree() -> void:
+	stop_all()
+	streams.clear()
+
+func stop_all() -> void:
+	for audio_player: AudioStreamPlayer in players:
+		audio_player.stop()
+		audio_player.stream = null
+
 func _tone(start_frequency: float, end_frequency: float, seconds: float, volume: float) -> AudioStreamWAV:
 	var mix_rate := 44100
 	var sample_count := int(seconds * mix_rate)

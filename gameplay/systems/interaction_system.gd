@@ -4,14 +4,16 @@ extends Node
 var players: Array[HeistPlayer] = []
 var artifact: CursedArtifact
 var chests: Array[LootChest] = []
+var void_shrines: Array[VoidShrine] = []
 var recorder: MatchRecorder
 var audio: AudioDirector
 var enabled := true
 
-func configure(assigned_players: Array[HeistPlayer], assigned_artifact: CursedArtifact, assigned_chests: Array[LootChest], assigned_recorder: MatchRecorder, assigned_audio: AudioDirector) -> void:
+func configure(assigned_players: Array[HeistPlayer], assigned_artifact: CursedArtifact, assigned_chests: Array[LootChest], assigned_void_shrines: Array[VoidShrine], assigned_recorder: MatchRecorder, assigned_audio: AudioDirector) -> void:
 	players = assigned_players
 	artifact = assigned_artifact
 	chests = assigned_chests
+	void_shrines = assigned_void_shrines
 	recorder = assigned_recorder
 	audio = assigned_audio
 	for player: HeistPlayer in players:
@@ -43,6 +45,8 @@ func context_prompt(player: HeistPlayer) -> StringName:
 		return &"PROMPT_PICKUP"
 	if is_instance_valid(_nearest_chest(player)):
 		return &"PROMPT_OPEN_CHEST"
+	if is_instance_valid(_nearest_void(player)):
+		return &"PROMPT_ACTIVATE_VOID"
 	if is_instance_valid(artifact.carrier) and player.global_position.distance_to(artifact.carrier.global_position) <= GameConstants.SHOVE_RANGE + 0.5:
 		return &"PROMPT_STEAL"
 	return &""
@@ -66,6 +70,10 @@ func _on_interaction_requested(player: HeistPlayer) -> void:
 	var chest := _nearest_chest(player)
 	if is_instance_valid(chest):
 		chest.interact(player)
+		return
+	var shrine := _nearest_void(player)
+	if is_instance_valid(shrine):
+		shrine.begin_activation(player)
 
 func _nearest_chest(player: HeistPlayer) -> LootChest:
 	var nearest: LootChest
@@ -76,6 +84,18 @@ func _nearest_chest(player: HeistPlayer) -> LootChest:
 		var distance := player.global_position.distance_to(chest.global_position)
 		if distance < nearest_distance:
 			nearest = chest
+			nearest_distance = distance
+	return nearest
+
+func _nearest_void(player: HeistPlayer) -> VoidShrine:
+	var nearest: VoidShrine
+	var nearest_distance := INF
+	for shrine: VoidShrine in void_shrines:
+		if not shrine.can_interact(player):
+			continue
+		var distance := player.global_position.distance_to(shrine.global_position)
+		if distance < nearest_distance:
+			nearest = shrine
 			nearest_distance = distance
 	return nearest
 

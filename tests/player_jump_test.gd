@@ -16,9 +16,12 @@ func _run() -> void:
 	event.physical_keycode = KEY_SPACE
 	event.pressed = true
 	Input.parse_input_event(event)
-	await physics_frame
-	event.pressed = false
-	Input.parse_input_event(event)
+	for frame: int in range(2):
+		await physics_frame
+	var release_event := InputEventKey.new()
+	release_event.physical_keycode = KEY_SPACE
+	release_event.pressed = false
+	Input.parse_input_event(release_event)
 	var peak_y := start_y
 	for frame: int in range(30):
 		await physics_frame

@@ -4,13 +4,13 @@ extends Node3D
 var target: HeistPlayer
 var camera: Camera3D
 var yaw := 0.0
-var pitch := -0.58
-var distance := 10.5
+var pitch := -0.66
+var distance := 11.8
 var sensitivity := 0.0026
 
 func _ready() -> void:
 	camera = Camera3D.new()
-	camera.fov = 54.0
+	camera.fov = 61.0
 	camera.near = 0.12
 	camera.far = 140.0
 	add_child(camera)

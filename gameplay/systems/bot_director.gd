@@ -27,15 +27,16 @@ func reset() -> void:
 
 func _update_bot(player: HeistPlayer) -> void:
 	if artifact.carrier == player:
-		var escape_target := HeistArena.EXTRACTION_CENTER if round_director.extraction_unlocked else Vector3(-14.0 + player.player_index * 8.0, 0.0, -10.0 + player.player_index * 6.0)
-		player.set_bot_target(escape_target)
+		var escape_target := HeistArena.EXTRACTION_CENTER if round_director.extraction_unlocked else Vector3(-6.0 + player.player_index * 10.0, 0.0, -4.0 + float(player.player_index % 2) * 8.0)
+		player.set_bot_target(MuseumRoutePlanner.next_target(player.global_position, escape_target))
 	elif artifact.carrier == null:
-		player.set_bot_target(artifact.global_position)
+		player.set_bot_target(MuseumRoutePlanner.next_target(player.global_position, artifact.global_position))
 		if player.global_position.distance_to(artifact.global_position) <= GameConstants.INTERACTION_RANGE and action_seconds <= 0.0:
 			player.trigger_bot_interaction()
 			action_seconds = 0.32
 	else:
-		player.set_bot_target(artifact.carrier.global_position)
-		if player.global_position.distance_to(artifact.carrier.global_position) <= GameConstants.SHOVE_RANGE and action_seconds <= 0.0:
+		player.set_bot_target(MuseumRoutePlanner.next_target(player.global_position, artifact.carrier.global_position))
+		var weapon_range: float = WeaponCatalog.definition(player.weapon_id)["range"]
+		if player.global_position.distance_to(artifact.carrier.global_position) <= weapon_range * 0.88 and action_seconds <= 0.0:
 			player.trigger_bot_shove()
 			action_seconds = 0.28

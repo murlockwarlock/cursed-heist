@@ -259,6 +259,79 @@ def build_mask_case():
         sphere("EyeHole", (x, -0.3, 1.56), (0.055, 0.025, 0.075), "stone").parent = root
 
 
+def build_plant():
+    root = bpy.data.objects.new("MoonPlant", None)
+    bpy.context.collection.objects.link(root)
+    cylinder("Pot", (0, 0, 0.34), 0.42, 0.68, "coral", 10).parent = root
+    cylinder("Stem", (0, 0, 1.0), 0.08, 0.8, "wood", 8).parent = root
+    for index in range(7):
+        angle = index * math.tau / 7.0
+        leaf = sphere("Leaf", (math.cos(angle) * 0.34, math.sin(angle) * 0.34, 1.34 + index % 2 * 0.18), (0.18, 0.42, 0.16), "lime")
+        leaf.rotation_euler.z = angle
+        leaf.parent = root
+    sphere("Bloom", (0, 0, 1.72), (0.26, 0.26, 0.28), "purple").parent = root
+
+
+def build_armor():
+    root = bpy.data.objects.new("ArmorDisplay", None)
+    bpy.context.collection.objects.link(root)
+    cube("Plinth", (0, 0, 0.18), (1.0, 0.85, 0.36), "stone_light", 0.1).parent = root
+    cube("Torso", (0, 0, 1.35), (0.72, 0.42, 0.86), "stone_light", 0.16, 0.72).parent = root
+    sphere("Helmet", (0, 0, 2.05), (0.38, 0.35, 0.36), "stone_light", 0.72).parent = root
+    cube("Visor", (0, -0.34, 2.02), (0.5, 0.08, 0.15), "gold", 0.04, 0.8).parent = root
+    for x in (-0.48, 0.48):
+        sphere("Shoulder", (x, 0, 1.65), (0.25, 0.3, 0.24), "gold", 0.75).parent = root
+    cylinder("Spear", (0.7, 0, 1.45), 0.055, 2.9, "gold", 8, 0.8).parent = root
+
+
+def build_clock():
+    root = bpy.data.objects.new("MoonClock", None)
+    bpy.context.collection.objects.link(root)
+    cube("ClockBody", (0, 0, 1.35), (1.05, 0.55, 2.7), "wood", 0.16).parent = root
+    sphere("ClockFace", (0, -0.34, 1.92), (0.4, 0.08, 0.4), "cream").parent = root
+    for angle in (0.0, 1.9):
+        hand = cube("Hand", (0, -0.44, 1.92), (0.06, 0.04, 0.31), "purple", 0.02)
+        hand.rotation_euler.y = angle
+        hand.parent = root
+    sphere("Pendulum", (0, -0.34, 0.72), (0.18, 0.07, 0.24), "gold", 0.75).parent = root
+
+
+def build_rope_barrier():
+    root = bpy.data.objects.new("RopeBarrier", None)
+    bpy.context.collection.objects.link(root)
+    for x in (-1.05, 1.05):
+        cylinder("Post", (x, 0, 0.62), 0.09, 1.24, "gold", 10, 0.8).parent = root
+        sphere("Cap", (x, 0, 1.28), (0.16, 0.16, 0.16), "gold", 0.8).parent = root
+        cylinder("Foot", (x, 0, 0.08), 0.3, 0.16, "gold", 12, 0.8).parent = root
+    rope = torus("Rope", (0, 0, 1.0), 1.05, 0.07, "coral", (math.pi * 0.5, 0.0, 0.0))
+    rope.scale.z = 0.42
+    rope.parent = root
+
+
+def build_crystal():
+    root = bpy.data.objects.new("VoidCrystal", None)
+    bpy.context.collection.objects.link(root)
+    cube("Base", (0, 0, 0.16), (1.25, 1.0, 0.32), "stone", 0.1).parent = root
+    for index, offset in enumerate(((-0.3, 0.12), (0.0, -0.08), (0.32, 0.18), (0.12, 0.3))):
+        bpy.ops.mesh.primitive_cone_add(vertices=6, radius1=0.22 if index else 0.3, radius2=0.04, depth=1.0 + index * 0.2, location=(offset[0], offset[1], 0.7 + index * 0.1))
+        crystal = bpy.context.object
+        crystal.name = "Crystal"
+        crystal.data.materials.append(material("CrystalGlow", PALETTE["purple"], 0.28, 0.2, PALETTE["purple"]))
+        crystal.parent = root
+
+
+def build_console():
+    root = bpy.data.objects.new("SecurityConsole", None)
+    bpy.context.collection.objects.link(root)
+    cube("ConsoleBody", (0, 0, 0.65), (2.2, 0.85, 1.3), "stone", 0.14).parent = root
+    screen = cube("Screen", (0, -0.48, 1.02), (1.45, 0.08, 0.58), "lime", 0.04)
+    screen.data.materials.clear()
+    screen.data.materials.append(material("ConsoleGlow", PALETTE["lime"], 0.15, 0.2, PALETTE["lime"]))
+    screen.parent = root
+    for x in (-0.55, 0.0, 0.55):
+        sphere("Button", (x, -0.5, 0.48), (0.09, 0.04, 0.09), "coral").parent = root
+
+
 BUILDERS = {
     "chest": build_chest,
     "bookshelf": build_bookshelf,
@@ -272,6 +345,12 @@ BUILDERS = {
     "brazier": build_brazier,
     "reception": build_reception,
     "mask_case": build_mask_case,
+    "plant": build_plant,
+    "armor": build_armor,
+    "clock": build_clock,
+    "rope_barrier": build_rope_barrier,
+    "crystal": build_crystal,
+    "console": build_console,
 }
 
 

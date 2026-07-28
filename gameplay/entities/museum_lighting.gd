@@ -21,7 +21,7 @@ func _build_environment() -> void:
 	environment.sky = sky
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color("7755aa")
-	environment.ambient_light_energy = 0.52
+	environment.ambient_light_energy = 0.3
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.fog_enabled = true
 	environment.fog_light_color = Color("301c4b")
@@ -33,19 +33,16 @@ func _build_environment() -> void:
 func _build_lights() -> void:
 	var moon := DirectionalLight3D.new()
 	moon.light_color = Color("a895ff")
-	moon.light_energy = 1.15
+	moon.light_energy = 0.82
 	moon.rotation_degrees = Vector3(-56.0, -38.0, 0.0)
 	moon.shadow_enabled = true
 	add_child(moon)
-	var positions: Array[Vector3] = []
-	for x: float in [-16.0, -8.0, 0.0, 8.0, 16.0]:
-		for z: float in [-10.0, 0.0, 10.0]:
-			positions.append(Vector3(x, 4.5, z))
-	for index: int in range(positions.size()):
+	for index: int in range(MuseumLayout.ROOMS.size()):
+		var room: Dictionary = MuseumLayout.ROOMS[index]
 		var light := OmniLight3D.new()
-		light.position = positions[index]
-		light.light_color = Color("a957ff") if index % 3 == 1 else Color("ffbf62")
-		light.light_energy = 2.8
-		light.omni_range = 8.5
-		light.shadow_enabled = index % 2 == 0
+		light.position = room["position"] + Vector3.UP * 4.2
+		light.light_color = room["light"]
+		light.light_energy = room["energy"]
+		light.omni_range = maxf(room["size"].x, room["size"].z) * 0.72
+		light.shadow_enabled = index % 3 == 0
 		add_child(light)

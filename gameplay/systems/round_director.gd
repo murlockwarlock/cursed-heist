@@ -35,7 +35,7 @@ func _process(delta: float) -> void:
 		artifact_heat = maxf(artifact_heat - delta * 0.04, 0.0)
 		artifact.heat = artifact_heat
 	if not arena.safe_artifact_position(artifact.global_position):
-		artifact.reset_to(Vector3(0.0, 1.2, 0.0))
+		artifact.reset_to(HeistArena.ARTIFACT_HOME)
 		audio.play(&"drop")
 	if time_left <= 0.0:
 		completed.emit(_highest_scoring_player(), &"WIN_POWER")
@@ -49,6 +49,12 @@ func reset() -> void:
 	enabled = true
 	arena.set_extraction_unlocked(false)
 	artifact.heat = 0.0
+
+func add_time(seconds: float) -> void:
+	time_left = minf(time_left + seconds, GameConstants.ROUND_SECONDS + 60.0)
+
+func seals_broken() -> int:
+	return mini(int(artifact_charge / (GameConstants.EXTRACTION_CHARGE / GameConstants.EXIT_SEAL_COUNT)), GameConstants.EXIT_SEAL_COUNT)
 
 func _process_carrier(delta: float, carrier: HeistPlayer) -> void:
 	artifact_heat = minf(artifact_heat + delta / 8.0, 1.0)

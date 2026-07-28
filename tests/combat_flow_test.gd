@@ -10,6 +10,7 @@ func _run() -> void:
 	root.add_child(game)
 	for frame: int in range(8):
 		await physics_frame
+	game.audio.streams.clear()
 	var player: HeistPlayer = game.players[0]
 	game.artifact.global_position = player.global_position + Vector3.FORWARD
 	if not game.artifact.pick_up(player):
@@ -34,6 +35,11 @@ func _run() -> void:
 		quit(1)
 		return
 	print("Combat flow: pickup, defeat, ghost, revive")
+	for frame: int in range(20):
+		await physics_frame
+	game.audio.stop_all()
+	for frame: int in range(2):
+		await process_frame
 	game.queue_free()
 	await process_frame
 	quit()

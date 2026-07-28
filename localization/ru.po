@@ -19,7 +19,7 @@ msgid "HEAT_LABEL"
 msgstr "ЖАР %d%%"
 
 msgid "CONTROLS_HINT"
-msgstr "WASD ДВИЖЕНИЕ · МЫШЬ КАМЕРА · SPACE ПРЫЖОК · ЛКМ ТОЛЧОК · ПКМ АРТЕФАКТ · F ЭМОЦИЯ · ESC КУРСОР"
+msgstr "WASD ДВИЖЕНИЕ · МЫШЬ КАМЕРА · SPACE ПРЫЖОК · ЛКМ ОРУЖИЕ · ПКМ ДЕЙСТВИЕ · F ЭМОЦИЯ · ESC КУРСОР"
 
 msgid "WINNER_LABEL"
 msgstr "%s ПОБЕДИЛ"
@@ -88,7 +88,7 @@ msgid "PROMPT_THROW"
 msgstr "ПКМ · БРОСИТЬ / ПЕРЕДАТЬ"
 
 msgid "PROMPT_STEAL"
-msgstr "ЛКМ · ТОЛКНУТЬ И ОТНЯТЬ"
+msgstr "ЛКМ · АТАКОВАТЬ И ОТНЯТЬ"
 
 msgid "PROMPT_GHOST"
 msgstr "ПРИЗРАК · F ЧТОБЫ ПУГАТЬ"
@@ -104,3 +104,99 @@ msgstr "АРТЕФАКТ У %s · ДОГОНИ ЕГО"
 
 msgid "PROMPT_OPEN_CHEST"
 msgstr "ПКМ ОТКРЫТЬ СУНДУК · +HP +ОЧКИ"
+
+msgid "PROMPT_ACTIVATE_VOID"
+msgstr "ПКМ АКТИВИРОВАТЬ РАЗЛОМ · НЕ УХОДИ"
+
+msgid "YOU_LABEL"
+msgstr "ТЫ"
+
+msgid "WEAPON_LABEL"
+msgstr "ОРУЖИЕ"
+
+msgid "WEAPON_BATON"
+msgstr "БАРХАТНАЯ ДУБИНКА"
+
+msgid "WEAPON_BLUNDERBUSS"
+msgstr "МУЗЕЙНЫЙ МУШКЕТОН"
+
+msgid "WEAPON_FOAM_SPRAYER"
+msgstr "РЕСТАВРАЦИОННАЯ ПЕНА"
+
+msgid "OBJECTIVE_FIND_ARTIFACT"
+msgstr "НАЙДИ ЖИВОЙ АРТЕФАКТ"
+
+msgid "OBJECTIVE_BREAK_SEALS"
+msgstr "УДЕРЖИВАЙ АРТЕФАКТ · ПЕЧАТИ ВЫХОДА %d/%d"
+
+msgid "OBJECTIVE_STEAL_FROM"
+msgstr "ОТБЕРИ АРТЕФАКТ У %s"
+
+msgid "OBJECTIVE_ESCAPE"
+msgstr "ВЫХОД ОТКРЫТ · БЕГИ В ВОСТОЧНОЕ ХРАНИЛИЩЕ"
+
+msgid "ARTIFACT_OVERHEAT"
+msgstr "ПЕРЕГРЕВ АРТЕФАКТА %d%% · ПЕРЕДАЙ ЕГО"
+
+msgid "VOID_LABEL"
+msgstr "РАЗЛОМ БЕЗДНЫ"
+
+msgid "VOID_SPENT"
+msgstr "РАЗЛОМ ПОГАС"
+
+msgid "VOID_REWARD_TIME"
+msgstr "+20 СЕКУНД"
+
+msgid "VOID_REWARD_HEAL"
+msgstr "ВОССТАНОВИТЬ HP"
+
+msgid "VOID_REWARD_CLEANSE"
+msgstr "СНЯТЬ ПРОКЛЯТИЯ"
+
+msgid "VOID_REWARD_WEAPON"
+msgstr "СМЕНИТЬ ОРУЖИЕ"
+
+msgid "ROOM_FOYER"
+msgstr "ЛУННОЕ ФОЙЕ"
+
+msgid "ROOM_PORTRAITS"
+msgstr "ЗАЛ ПОРТРЕТОВ"
+
+msgid "ROOM_MASKS"
+msgstr "ГАЛЕРЕЯ МАСОК"
+
+msgid "ROOM_GALLERY"
+msgstr "БОЛЬШАЯ ГАЛЕРЕЯ"
+
+msgid "ROOM_ARCHIVE"
+msgstr "ПРОКЛЯТЫЙ АРХИВ"
+
+msgid "ROOM_GARDEN"
+msgstr "ЛУННЫЙ САД"
+
+msgid "ROOM_ROTUNDA"
+msgstr "РОТОНДА АРТЕФАКТА"
+
+msgid "ROOM_SECURITY"
+msgstr "КОМНАТА ОХРАНЫ"
+
+msgid "ROOM_RESTORATION"
+msgstr "РЕСТАВРАЦИОННАЯ"
+
+msgid "ROOM_CURSED"
+msgstr "ЗАПРЕТНОЕ КРЫЛО"
+
+msgid "ROOM_CRYPT"
+msgstr "ПОДЗЕМЕЛЬЕ"
+
+msgid "ROOM_TREASURY"
+msgstr "ЗАЛ СОКРОВИЩ"
+
+msgid "ROOM_ARMORY"
+msgstr "КОРОЛЕВСКАЯ ОРУЖЕЙНАЯ"
+
+msgid "ROOM_COLLECTION"
+msgstr "БОЛЬШАЯ КОЛЛЕКЦИЯ"
+
+msgid "ROOM_VAULT"
+msgstr "ЛУННОЕ ХРАНИЛИЩЕ"

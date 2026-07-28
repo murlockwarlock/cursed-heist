@@ -27,7 +27,17 @@ func _run() -> void:
 	if chest.opened:
 		await _fail("Chest state did not reset with the round")
 		return
-	print("Museum map: %d props, %d interactive chests" % [MuseumLayout.PROPS.size(), game.arena.chests.size()])
+	game.bot_director.enabled = false
+	var shrine: VoidShrine = game.arena.void_shrines[0]
+	player.global_position = shrine.global_position + Vector3(0.0, 0.0, 1.4)
+	var time_before: float = game.round_director.time_left
+	shrine.begin_activation(player)
+	for frame: int in range(170):
+		await physics_frame
+	if not shrine.consumed or game.round_director.time_left <= time_before:
+		await _fail("Void reward did not activate")
+		return
+	print("Museum V2: %d rooms, %d props, %d chests, %d voids" % [MuseumLayout.ROOMS.size(), MuseumLayout.PROPS.size(), game.arena.chests.size(), game.arena.void_shrines.size()])
 	game.queue_free()
 	await process_frame
 	quit()

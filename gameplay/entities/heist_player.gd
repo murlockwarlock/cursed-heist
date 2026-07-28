@@ -7,6 +7,7 @@ signal emote_started(player: HeistPlayer, emote: StringName)
 signal curses_changed(player: HeistPlayer)
 signal health_changed(player: HeistPlayer)
 signal defeated(player: HeistPlayer)
+signal weapon_changed(player: HeistPlayer)
 
 const KEY_PROFILES: Array[Dictionary] = [
 	{"up": KEY_W, "down": KEY_S, "left": KEY_A, "right": KEY_D, "interact": KEY_E, "shove": KEY_Q, "emote": KEY_F},
@@ -23,6 +24,7 @@ var joy_device := -1
 var score := 0.0
 var health := GameConstants.MAX_HEALTH
 var is_ghost := false
+var weapon_id: StringName = WeaponCatalog.BATON
 var carried_artifact: CursedArtifact
 var active_curses: Dictionary[StringName, float] = {}
 var facing := Vector3.FORWARD
@@ -33,10 +35,12 @@ var emote_seconds := 0.0
 var emote_name: StringName = &""
 var dance_grace := 6.0
 var pulse := 0.0
+var slowed_seconds := 0.0
 var is_bot := false
 var bot_target := Vector3.ZERO
 var movement_basis := Basis.IDENTITY
 var visual: HeistCharacterVisual
+var weapon_visual: HeistWeaponVisual
 var _previous_actions := {"interact": false, "shove": false, "emote": false, "jump": false}
 
 func _ready() -> void:
@@ -67,12 +71,23 @@ func assign_character(assigned_character: StringName) -> void:
 		visual.free()
 		_build_visual()
 
+func assign_weapon(assigned_weapon: StringName) -> void:
+	weapon_id = assigned_weapon
+	if is_instance_valid(weapon_visual):
+		weapon_visual.free()
+	_build_weapon_visual()
+	weapon_changed.emit(self)
+
+func cycle_weapon() -> void:
+	assign_weapon(WeaponCatalog.next(weapon_id))
+
 func _process(delta: float) -> void:
 	pulse += delta
 	stun_seconds = maxf(stun_seconds - delta, 0.0)
 	shove_cooldown = maxf(shove_cooldown - delta, 0.0)
 	emote_seconds = maxf(emote_seconds - delta, 0.0)
 	dance_grace = maxf(dance_grace - delta, 0.0)
+	slowed_seconds = maxf(slowed_seconds - delta, 0.0)
 	_tick_curses(delta)
 	_animate_visual()
 
@@ -145,9 +160,19 @@ func has_curse(id: StringName) -> bool:
 	return active_curses.has(id)
 
 func apply_shove(direction: Vector3) -> void:
+	apply_impact(direction, GameConstants.SHOVE_FORCE)
+
+func apply_impact(direction: Vector3, force: float) -> void:
 	var horizontal := Vector3(direction.x, 0.0, direction.z).normalized()
-	velocity += horizontal * GameConstants.SHOVE_FORCE + Vector3.UP * 2.8
+	velocity += horizontal * force + Vector3.UP * minf(force * 0.32, 3.8)
 	stun_seconds = 0.22
+
+func apply_slow(seconds: float) -> void:
+	slowed_seconds = maxf(slowed_seconds, seconds)
+
+func play_weapon_attack() -> void:
+	if is_instance_valid(weapon_visual):
+		weapon_visual.play_attack()
 
 func begin_emote() -> void:
 	emote_name = &"dance" if emote_name != &"dance" else &"taunt"
@@ -165,7 +190,7 @@ func trigger_bot_interaction() -> void:
 
 func trigger_bot_shove() -> void:
 	if not is_ghost and shove_cooldown <= 0.0:
-		shove_cooldown = 0.7
+		shove_cooldown = WeaponCatalog.definition(weapon_id)["cooldown"]
 		shove_requested.emit(self)
 
 func _movement_input() -> Vector3:
@@ -203,7 +228,7 @@ func _poll_actions() -> void:
 	if states["interact"] and not _previous_actions["interact"] and not is_ghost:
 		interaction_requested.emit(self)
 	if states["shove"] and not _previous_actions["shove"] and shove_cooldown <= 0.0 and not is_ghost:
-		shove_cooldown = 0.7
+		shove_cooldown = WeaponCatalog.definition(weapon_id)["cooldown"]
 		shove_requested.emit(self)
 	if states["emote"] and not _previous_actions["emote"]:
 		begin_emote()
@@ -233,12 +258,22 @@ func _speed_multiplier() -> float:
 		multiplier *= clampf(1.0 + score * 0.007, 1.0, 1.32)
 	if has_curse(CurseCatalog.DANCE_FEVER) and dance_grace <= 0.0:
 		multiplier *= 0.48
+	if slowed_seconds > 0.0:
+		multiplier *= 0.56
 	return multiplier
 
 func _build_visual() -> void:
 	visual = HeistCharacterVisual.new()
 	visual.configure(character_id, body_color)
 	add_child(visual)
+	_build_weapon_visual()
+
+func _build_weapon_visual() -> void:
+	if not is_instance_valid(visual):
+		return
+	weapon_visual = HeistWeaponVisual.new()
+	weapon_visual.configure(weapon_id, body_color)
+	visual.add_child(weapon_visual)
 
 func _animate_visual() -> void:
 	var movement := clampf(Vector2(velocity.x, velocity.z).length() / GameConstants.PLAYER_SPEED, 0.0, 1.0)

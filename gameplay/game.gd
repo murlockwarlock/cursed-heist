@@ -1,8 +1,8 @@
 extends Node3D
 
 const PLAYER_COLORS: Array[Color] = [Color("ff4d61"), Color("36d3ff"), Color("ffd43b"), Color("87f558")]
-const SPAWN_POINTS: Array[Vector3] = [Vector3(-17.7, 0.1, 0.0), Vector3(-16.0, 0.1, -2.0), Vector3(-16.0, 0.1, 2.0), Vector3(-12.0, 0.1, 0.0)]
-const ARTIFACT_SPAWN := Vector3(0.0, 1.2, 0.0)
+const SPAWN_POINTS: Array[Vector3] = [Vector3(-36.0, 0.1, -2.4), Vector3(-36.0, 0.1, 2.4), Vector3(-31.0, 0.1, -2.4), Vector3(-31.0, 0.1, 2.4)]
+const ARTIFACT_SPAWN := HeistArena.ARTIFACT_HOME
 
 var arena: HeistArena
 var artifact: CursedArtifact
@@ -33,8 +33,10 @@ func _ready() -> void:
 	recorder.configure(players.size())
 	add_child(recorder)
 	interactions = InteractionSystem.new()
-	interactions.configure(players, artifact, arena.chests, recorder, audio)
+	interactions.configure(players, artifact, arena.chests, arena.void_shrines, recorder, audio)
 	add_child(interactions)
+	for shrine: VoidShrine in arena.void_shrines:
+		shrine.activated.connect(_on_void_activated)
 	combat = CombatSystem.new()
 	combat.configure(players, artifact, recorder, audio)
 	combat.ghost_haunted.connect(_on_ghost_haunted)
@@ -51,6 +53,7 @@ func _ready() -> void:
 	curse_system.curse_applied.connect(_on_curse_applied)
 	add_child(curse_system)
 	hud = HeistHud.new()
+	hud.configure(artifact, arena.void_shrines)
 	add_child(hud)
 	camera_rig = HeistCamera.new()
 	camera_rig.target = players[0]
@@ -72,6 +75,7 @@ func _process(_delta: float) -> void:
 func _create_players() -> void:
 	var devices: PackedInt32Array = Input.get_connected_joypads()
 	var character_order := CharacterCatalog.random_order()
+	var weapon_order := WeaponCatalog.random_order()
 	for index: int in range(4):
 		var player := HeistPlayer.new()
 		var device: int = devices[index] if index < devices.size() else -1
@@ -80,15 +84,18 @@ func _create_players() -> void:
 		player.emote_started.connect(_on_emote_started)
 		players.append(player)
 		add_child(player)
+		player.assign_weapon(weapon_order[index])
 
 func reset_round() -> void:
 	round_finished = false
 	restart_key_down = Input.is_physical_key_pressed(KEY_ENTER)
 	artifact.reset_to(ARTIFACT_SPAWN)
 	var character_order := CharacterCatalog.random_order()
+	var weapon_order := WeaponCatalog.random_order()
 	for index: int in range(players.size()):
 		var player := players[index]
 		player.assign_character(character_order[index])
+		player.assign_weapon(weapon_order[index])
 		player.global_position = SPAWN_POINTS[index]
 		player.velocity = Vector3.ZERO
 		player.score = 0.0
@@ -139,10 +146,6 @@ func _update_context_prompt() -> void:
 	var prompt_key := interactions.context_prompt(players[0])
 	if prompt_key != &"":
 		hud.update_prompt(tr(prompt_key))
-	elif artifact.carrier == null:
-		hud.update_prompt(tr(&"PROMPT_FIND") % int(players[0].global_position.distance_to(artifact.global_position)))
-	elif artifact.carrier != players[0]:
-		hud.update_prompt(tr(&"PROMPT_CHASE") % artifact.carrier.player_name)
 	else:
 		hud.update_prompt("")
 
@@ -151,3 +154,20 @@ func _on_round_completed(winner: HeistPlayer, reason: StringName) -> void:
 
 func _on_ghost_haunted(_player: HeistPlayer) -> void:
 	round_director.artifact_heat = minf(round_director.artifact_heat + 0.08, 0.95)
+
+func _on_void_activated(_shrine: VoidShrine, player: HeistPlayer, reward: StringName) -> void:
+	match reward:
+		&"time":
+			round_director.add_time(20.0)
+		&"heal":
+			player.heal(45.0)
+		&"cleanse":
+			player.clear_curses()
+		&"weapon":
+			player.cycle_weapon()
+	player.add_curse(CurseCatalog.ECHO, 5.0)
+	round_director.artifact_heat = minf(round_director.artifact_heat + 0.12, 0.95)
+	player.score += 2.0
+	recorder.increment(player, &"voids")
+	recorder.record(&"void_activated", player)
+	audio.play(&"curse", 1.28)

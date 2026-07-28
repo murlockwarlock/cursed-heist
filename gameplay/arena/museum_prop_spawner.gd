@@ -14,6 +14,12 @@ const MODEL_PATHS := {
 	&"brazier": "res://assets/environment/models/brazier.glb",
 	&"reception": "res://assets/environment/models/reception.glb",
 	&"mask_case": "res://assets/environment/models/mask_case.glb",
+	&"plant": "res://assets/environment/models/plant.glb",
+	&"armor": "res://assets/environment/models/armor.glb",
+	&"clock": "res://assets/environment/models/clock.glb",
+	&"rope_barrier": "res://assets/environment/models/rope_barrier.glb",
+	&"crystal": "res://assets/environment/models/crystal.glb",
+	&"console": "res://assets/environment/models/console.glb",
 }
 
 var scenes: Dictionary[StringName, PackedScene] = {}

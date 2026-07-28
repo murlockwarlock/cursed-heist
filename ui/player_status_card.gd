@@ -4,10 +4,11 @@ extends PanelContainer
 var title_label: Label
 var health_bar: ProgressBar
 var detail_label: Label
+var weapon_label: Label
 var accent := Color.WHITE
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(270.0, 76.0)
+	custom_minimum_size = Vector2(350.0, 112.0)
 	var content := VBoxContainer.new()
 	content.add_theme_constant_override("separation", 3)
 	add_child(content)
@@ -23,6 +24,9 @@ func _ready() -> void:
 	detail_label.add_theme_font_size_override("font_size", 12)
 	detail_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	content.add_child(detail_label)
+	weapon_label = Label.new()
+	weapon_label.add_theme_font_size_override("font_size", 15)
+	content.add_child(weapon_label)
 
 func configure(color: Color) -> void:
 	accent = color
@@ -47,7 +51,7 @@ func configure(color: Color) -> void:
 	title_label.add_theme_color_override("font_color", accent.lightened(0.22))
 
 func update_player(player: HeistPlayer) -> void:
-	title_label.text = "%s · %s    %03d" % [player.player_name, CharacterCatalog.display_name(player.character_id), int(player.score)]
+	title_label.text = "%s · %s    %03d" % [tr(&"YOU_LABEL"), CharacterCatalog.display_name(player.character_id), int(player.score)]
 	health_bar.value = player.health
 	health_bar.modulate = Color(0.5, 0.9, 1.0, 0.72) if player.is_ghost else Color.WHITE
 	var curse_names: Array[String] = []
@@ -55,3 +59,5 @@ func update_player(player: HeistPlayer) -> void:
 		curse_names.append(CurseCatalog.title(id))
 	var life_state := tr(&"GHOST_LABEL") if player.is_ghost else tr(&"HEALTH_LABEL") % int(player.health)
 	detail_label.text = "%s    %s" % [life_state, " · ".join(curse_names)]
+	weapon_label.text = "%s  ·  %s" % [tr(&"WEAPON_LABEL"), WeaponCatalog.title(player.weapon_id)]
+	weapon_label.add_theme_color_override("font_color", WeaponCatalog.definition(player.weapon_id)["color"])
