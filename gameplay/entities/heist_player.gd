@@ -15,6 +15,7 @@ const KEY_PROFILES: Array[Dictionary] = [
 
 var player_index := 0
 var player_name := ""
+var character_id: StringName = CharacterCatalog.FOX
 var body_color := Color.WHITE
 var joy_device := -1
 var score := 0.0
@@ -30,10 +31,7 @@ var pulse := 0.0
 var is_bot := false
 var bot_target := Vector3.ZERO
 var movement_basis := Basis.IDENTITY
-var visual: Node3D
-var left_leg: MeshInstance3D
-var right_leg: MeshInstance3D
-var body_mesh: MeshInstance3D
+var visual: HeistCharacterVisual
 var _previous_actions := {"interact": false, "shove": false, "emote": false, "jump": false}
 
 func _ready() -> void:
@@ -50,12 +48,19 @@ func _ready() -> void:
 	add_child(collider)
 	_build_visual()
 
-func configure(index: int, assigned_color: Color, controller: int) -> void:
+func configure(index: int, assigned_color: Color, controller: int, assigned_character: StringName = CharacterCatalog.FOX) -> void:
 	player_index = index
 	player_name = "P%d" % (index + 1)
 	body_color = assigned_color
 	joy_device = controller
+	character_id = assigned_character
 	is_bot = index > 0
+
+func assign_character(assigned_character: StringName) -> void:
+	character_id = assigned_character
+	if is_instance_valid(visual):
+		visual.free()
+		_build_visual()
 
 func _process(delta: float) -> void:
 	pulse += delta
@@ -191,72 +196,10 @@ func _speed_multiplier() -> float:
 	return multiplier
 
 func _build_visual() -> void:
-	visual = Node3D.new()
+	visual = HeistCharacterVisual.new()
+	visual.configure(character_id, body_color)
 	add_child(visual)
-	body_mesh = _mesh_instance(_capsule(0.54, 1.2), body_color.darkened(0.12), Vector3(0.0, 0.93, 0.0))
-	visual.add_child(body_mesh)
-	var hood := _mesh_instance(_sphere(0.66, 0.78), body_color, Vector3(0.0, 1.55, 0.0))
-	visual.add_child(hood)
-	var face := _mesh_instance(_sphere(0.49, 0.42), Color("151020"), Vector3(0.0, 1.54, -0.43))
-	face.scale.z = 0.28
-	visual.add_child(face)
-	for eye_x: float in [-0.18, 0.18]:
-		var eye := _mesh_instance(_sphere(0.09, 0.12), Color("fff8de"), Vector3(eye_x, 1.6, -0.56))
-		eye.scale.z = 0.35
-		visual.add_child(eye)
-	left_leg = _mesh_instance(_capsule(0.17, 0.55), body_color.darkened(0.32), Vector3(-0.25, 0.3, 0.0))
-	right_leg = _mesh_instance(_capsule(0.17, 0.55), body_color.darkened(0.32), Vector3(0.25, 0.3, 0.0))
-	visual.add_child(left_leg)
-	visual.add_child(right_leg)
-	var rim := _mesh_instance(_torus(0.53, 0.62), Color("fff0bf"), Vector3(0.0, 1.54, -0.07))
-	rim.rotation.x = PI * 0.5
-	visual.add_child(rim)
 
 func _animate_visual() -> void:
 	var movement := clampf(Vector2(velocity.x, velocity.z).length() / GameConstants.PLAYER_SPEED, 0.0, 1.0)
-	var step := sin(pulse * 12.0) * movement
-	left_leg.rotation.x = step * 0.65
-	right_leg.rotation.x = -step * 0.65
-	body_mesh.position.y = 0.93 + abs(sin(pulse * 12.0)) * movement * 0.08
-	if emote_name == &"dance" and emote_seconds > 0.0:
-		visual.rotation.z = sin(pulse * 15.0) * 0.22
-		visual.scale = Vector3.ONE * (1.0 + sin(pulse * 18.0) * 0.05)
-	else:
-		visual.rotation.z = lerpf(visual.rotation.z, 0.0, 0.18)
-		visual.scale = visual.scale.lerp(Vector3.ONE, 0.18)
-
-func _mesh_instance(mesh: PrimitiveMesh, color: Color, position: Vector3) -> MeshInstance3D:
-	var instance := MeshInstance3D.new()
-	instance.mesh = mesh
-	instance.position = position
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = 0.48
-	material.metallic = 0.08
-	instance.material_override = material
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-	return instance
-
-func _sphere(radius: float, height: float) -> SphereMesh:
-	var mesh := SphereMesh.new()
-	mesh.radius = radius
-	mesh.height = height * 2.0
-	mesh.radial_segments = 24
-	mesh.rings = 12
-	return mesh
-
-func _capsule(radius: float, height: float) -> CapsuleMesh:
-	var mesh := CapsuleMesh.new()
-	mesh.radius = radius
-	mesh.height = height
-	mesh.radial_segments = 24
-	mesh.rings = 8
-	return mesh
-
-func _torus(inner_radius: float, outer_radius: float) -> TorusMesh:
-	var mesh := TorusMesh.new()
-	mesh.inner_radius = inner_radius
-	mesh.outer_radius = outer_radius
-	mesh.rings = 24
-	mesh.ring_segments = 8
-	return mesh
+	visual.animate(pulse, movement, emote_name, emote_seconds)

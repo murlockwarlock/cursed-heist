@@ -41,7 +41,7 @@ func update_state(players: Array[HeistPlayer], time_left: float, charge: float, 
 		var curse_names: Array[String] = []
 		for id: StringName in player.active_curses:
 			curse_names.append(CurseCatalog.title(id))
-		player_labels[index].text = "%s  %03d\n%s" % [player.player_name, int(player.score), " · ".join(curse_names)]
+		player_labels[index].text = "%s · %s  %03d\n%s" % [player.player_name, CharacterCatalog.display_name(player.character_id), int(player.score), " · ".join(curse_names)]
 		player_labels[index].add_theme_color_override("font_color", player.body_color.lightened(0.24))
 
 func show_result(winner: HeistPlayer, reason: String, titles: Array[String]) -> void:

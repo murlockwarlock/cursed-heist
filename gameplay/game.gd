@@ -129,10 +129,11 @@ func _build_world() -> void:
 
 func _create_players() -> void:
 	var devices: PackedInt32Array = Input.get_connected_joypads()
+	var character_order := CharacterCatalog.random_order()
 	for index: int in range(4):
 		var player := HeistPlayer.new()
 		var device: int = devices[index] if index < devices.size() else -1
-		player.configure(index, PLAYER_COLORS[index], device)
+		player.configure(index, PLAYER_COLORS[index], device, character_order[index])
 		player.position = SPAWN_POINTS[index]
 		player.interaction_requested.connect(_on_interaction_requested)
 		player.shove_requested.connect(_on_shove_requested)
@@ -171,8 +172,10 @@ func reset_round() -> void:
 	arena.set_extraction_unlocked(false)
 	artifact.heat = 0.0
 	artifact.reset_to(ARTIFACT_SPAWN)
+	var character_order := CharacterCatalog.random_order()
 	for index: int in range(players.size()):
 		var player := players[index]
+		player.assign_character(character_order[index])
 		player.global_position = SPAWN_POINTS[index]
 		player.velocity = Vector3.ZERO
 		player.score = 0.0
