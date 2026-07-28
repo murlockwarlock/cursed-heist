@@ -1,6 +1,7 @@
 class_name CombatSystem
 extends Node
 
+const SimulationAuthorityScript = preload("res://core/simulation_authority.gd")
 signal ghost_haunted(player: HeistPlayer)
 
 var players: Array[HeistPlayer] = []
@@ -36,7 +37,7 @@ func explode_artifact(carrier: HeistPlayer) -> void:
 	audio.play(&"curse", 0.58)
 
 func _on_shove_requested(player: HeistPlayer) -> void:
-	if not enabled:
+	if not enabled or not SimulationAuthorityScript.can_mutate(self):
 		return
 	var definition := WeaponCatalog.definition(player.weapon_id)
 	var range: float = definition["range"]
@@ -65,7 +66,7 @@ func _on_shove_requested(player: HeistPlayer) -> void:
 		recorder.increment(player, &"weapon_hits")
 		recorder.record(player.weapon_id, player, target)
 		if artifact.carrier == target:
-			artifact.drop(offset.normalized() * definition["force"] + Vector3.UP * 2.2)
+			artifact.damage_grip(target, definition["grip_damage"] * falloff, offset.normalized() * definition["force"] + Vector3.UP * 2.2)
 
 func _has_line_of_sight(player: HeistPlayer, target: HeistPlayer) -> bool:
 	var from := player.global_position + Vector3.UP

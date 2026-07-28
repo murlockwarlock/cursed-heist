@@ -22,6 +22,28 @@ const ROOMS: Array[Dictionary] = [
 const HORIZONTAL_DOORS: Array[float] = [-32.0, -16.0, 0.0, 16.0, 32.0]
 const VERTICAL_PARTITIONS: Array[float] = [-24.0, -8.0, 8.0, 24.0]
 
+const RESPAWN_POINTS: Array[Vector3] = [
+	Vector3(-34.0, 0.1, -19.0),
+	Vector3(-34.0, 0.1, 19.0),
+	Vector3(-17.0, 0.1, -19.0),
+	Vector3(-17.0, 0.1, 19.0),
+	Vector3(0.0, 0.1, -19.0),
+	Vector3(0.0, 0.1, 19.0),
+	Vector3(19.0, 0.1, -16.0),
+	Vector3(16.0, 0.1, 19.0),
+	Vector3(29.0, 0.1, -16.0),
+	Vector3(33.0, 0.1, 16.0),
+]
+
+const SEAL_POINTS: Array[Vector3] = [
+	Vector3(-28.0, 0.0, -20.0),
+	Vector3(-14.0, 0.0, -16.0),
+	Vector3(-13.0, 0.0, 18.0),
+	Vector3(3.0, 0.0, -17.0),
+	Vector3(18.0, 0.0, 17.0),
+	Vector3(31.0, 0.0, -16.0),
+]
+
 const PROPS: Array[Dictionary] = [
 	{"id": &"reception", "position": Vector3(-38.2, 0.0, 0.0), "rotation": 0.0, "collision": Vector3(3.6, 1.5, 1.1)},
 	{"id": &"bench", "position": Vector3(-34.0, 0.0, -4.5), "rotation": 0.0, "collision": Vector3(2.5, 0.9, 0.8)},

@@ -21,12 +21,16 @@ func _build_environment() -> void:
 	environment.sky = sky
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color("7755aa")
-	environment.ambient_light_energy = 0.3
+	environment.ambient_light_energy = 0.46
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	environment.adjustment_enabled = true
+	environment.adjustment_brightness = 1.08
+	environment.adjustment_contrast = 1.12
+	environment.adjustment_saturation = 1.08
 	environment.fog_enabled = true
 	environment.fog_light_color = Color("301c4b")
 	environment.fog_light_energy = 0.55
-	environment.fog_density = 0.006
+	environment.fog_density = 0.0035
 	world_environment.environment = environment
 	add_child(world_environment)
 
@@ -44,5 +48,5 @@ func _build_lights() -> void:
 		light.light_color = room["light"]
 		light.light_energy = room["energy"]
 		light.omni_range = maxf(room["size"].x, room["size"].z) * 0.72
-		light.shadow_enabled = index % 3 == 0
+		light.shadow_enabled = index in [0, 6]
 		add_child(light)

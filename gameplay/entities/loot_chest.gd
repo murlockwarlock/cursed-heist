@@ -7,7 +7,6 @@ var opened := false
 var lid: Node3D
 var closed_lid_transform := Transform3D.IDENTITY
 var model_scene: PackedScene
-var glow: OmniLight3D
 
 func configure(scene: PackedScene) -> void:
 	model_scene = scene
@@ -27,12 +26,6 @@ func _ready() -> void:
 	collider.shape = shape
 	body.add_child(collider)
 	add_child(body)
-	glow = OmniLight3D.new()
-	glow.position = Vector3(0.0, 1.25, 0.0)
-	glow.light_color = Color("ffd14a")
-	glow.light_energy = 0.0
-	glow.omni_range = 3.5
-	add_child(glow)
 
 func can_interact(player: HeistPlayer) -> bool:
 	return not opened and not player.is_ghost and player.global_position.distance_to(global_position) <= GameConstants.INTERACTION_RANGE
@@ -45,13 +38,22 @@ func interact(player: HeistPlayer) -> void:
 		var tween := create_tween().set_parallel(true)
 		tween.tween_property(lid, "rotation_degrees:x", -68.0, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tween.tween_property(lid, "position:y", lid.position.y + 0.15, 0.35)
-	var light_tween := create_tween()
-	light_tween.tween_property(glow, "light_energy", 4.0, 0.12)
-	light_tween.tween_property(glow, "light_energy", 0.65, 0.55)
+	_flash_glow()
 	opened_by.emit(self, player)
 
 func reset() -> void:
 	opened = false
-	glow.light_energy = 0.0
 	if is_instance_valid(lid):
 		lid.transform = closed_lid_transform
+
+func _flash_glow() -> void:
+	var glow := OmniLight3D.new()
+	glow.position = Vector3(0.0, 1.25, 0.0)
+	glow.light_color = Color("ffd14a")
+	glow.light_energy = 0.0
+	glow.omni_range = 3.5
+	add_child(glow)
+	var tween := create_tween()
+	tween.tween_property(glow, "light_energy", 4.0, 0.1)
+	tween.tween_property(glow, "light_energy", 0.0, 0.7)
+	tween.tween_callback(glow.queue_free)

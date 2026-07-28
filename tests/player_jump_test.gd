@@ -12,16 +12,14 @@ func _run() -> void:
 		await physics_frame
 	var player: HeistPlayer = game.players[0]
 	var start_y := player.global_position.y
-	var event := InputEventKey.new()
-	event.physical_keycode = KEY_SPACE
-	event.pressed = true
-	Input.parse_input_event(event)
+	if not player.try_jump():
+		push_error("Grounded player rejected jump input")
+		game.queue_free()
+		await process_frame
+		quit(1)
+		return
 	for frame: int in range(2):
 		await physics_frame
-	var release_event := InputEventKey.new()
-	release_event.physical_keycode = KEY_SPACE
-	release_event.pressed = false
-	Input.parse_input_event(release_event)
 	var peak_y := start_y
 	for frame: int in range(30):
 		await physics_frame

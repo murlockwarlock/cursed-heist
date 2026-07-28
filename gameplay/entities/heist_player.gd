@@ -1,6 +1,7 @@
 class_name HeistPlayer
 extends CharacterBody3D
 
+const PlayerWorldMarkerScript = preload("res://ui/player_world_marker.gd")
 signal interaction_requested(player: HeistPlayer)
 signal shove_requested(player: HeistPlayer)
 signal emote_started(player: HeistPlayer, emote: StringName)
@@ -40,11 +41,14 @@ var emote_name: StringName = &""
 var dance_grace := 6.0
 var pulse := 0.0
 var slowed_seconds := 0.0
+var respawn_seconds := 0.0
+var spawn_protection_seconds := 0.0
 var is_bot := false
 var bot_target := Vector3.ZERO
 var movement_basis := Basis.IDENTITY
 var visual: HeistCharacterVisual
 var weapon_visual: HeistWeaponVisual
+var world_marker: Node3D
 var _previous_actions := {"interact": false, "shove": false, "emote": false, "jump": false}
 
 func _ready() -> void:
@@ -60,6 +64,9 @@ func _ready() -> void:
 	collider.position.y = 0.86
 	add_child(collider)
 	_build_visual()
+	world_marker = PlayerWorldMarkerScript.new()
+	world_marker.configure(self)
+	add_child(world_marker)
 
 func configure(index: int, assigned_color: Color, controller: int, assigned_character: StringName = CharacterCatalog.FOX) -> void:
 	player_index = index
@@ -92,6 +99,7 @@ func _process(delta: float) -> void:
 	emote_seconds = maxf(emote_seconds - delta, 0.0)
 	dance_grace = maxf(dance_grace - delta, 0.0)
 	slowed_seconds = maxf(slowed_seconds - delta, 0.0)
+	spawn_protection_seconds = maxf(spawn_protection_seconds - delta, 0.0)
 	_tick_curses(delta)
 	_animate_visual()
 
@@ -125,7 +133,7 @@ func _physics_process(delta: float) -> void:
 	_clamp_to_arena()
 
 func take_damage(amount: float) -> void:
-	if is_ghost or amount <= 0.0:
+	if is_ghost or spawn_protection_seconds > 0.0 or amount <= 0.0:
 		return
 	health = maxf(health - amount, 0.0)
 	health_changed.emit(self)
@@ -146,11 +154,21 @@ func heal(amount: float) -> void:
 func revive() -> void:
 	health = GameConstants.MAX_HEALTH
 	is_ghost = false
+	respawn_seconds = 0.0
 	collision_layer = 1
 	collision_mask = 5
 	if is_instance_valid(visual):
 		visual.set_ghost_mode(false)
 	health_changed.emit(self)
+
+func revive_at(point: Vector3) -> void:
+	global_position = point
+	velocity = Vector3.ZERO
+	stun_seconds = 0.0
+	slowed_seconds = 0.0
+	spawn_protection_seconds = GameConstants.SPAWN_PROTECTION_SECONDS
+	clear_curses()
+	revive()
 
 func add_curse(id: StringName, duration: float) -> void:
 	active_curses[id] = maxf(active_curses.get(id, 0.0), duration)
@@ -183,6 +201,12 @@ func begin_emote() -> void:
 	emote_seconds = 1.4
 	dance_grace = 7.0
 	emote_started.emit(self, emote_name)
+
+func try_jump() -> bool:
+	if not is_on_floor() or stun_seconds > 0.0 or is_ghost:
+		return false
+	velocity.y = 8.2
+	return true
 
 func set_bot_target(target: Vector3) -> void:
 	bot_target = target
@@ -237,7 +261,7 @@ func _poll_actions() -> void:
 	if states["emote"] and not _previous_actions["emote"]:
 		begin_emote()
 	if states["jump"] and not _previous_actions["jump"] and is_on_floor() and stun_seconds <= 0.0 and not is_ghost:
-		velocity.y = 8.2
+		try_jump()
 	_previous_actions = states
 
 func _joy_pressed(button: JoyButton) -> bool:
@@ -277,6 +301,14 @@ func _build_weapon_visual() -> void:
 	weapon_visual = HeistWeaponVisual.new()
 	weapon_visual.configure(weapon_id, body_color)
 	visual.add_child(weapon_visual)
+
+func set_local_camera_hidden(hidden: bool) -> void:
+	if not is_instance_valid(visual):
+		return
+	for node: Node in visual.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := node as MeshInstance3D
+		mesh_instance.set_layer_mask_value(1, not hidden)
+		mesh_instance.set_layer_mask_value(2, hidden)
 
 func _animate_visual() -> void:
 	var movement := clampf(Vector2(velocity.x, velocity.z).length() / GameConstants.PLAYER_SPEED, 0.0, 1.0)

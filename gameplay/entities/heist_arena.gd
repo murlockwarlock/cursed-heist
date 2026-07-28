@@ -8,18 +8,20 @@ const ROTUNDA_CENTER := Vector3(-6.0, 0.0, 0.0)
 var extraction_unlocked := false
 var pulse := 0.0
 var seal_material: StandardMaterial3D
+var seal_visual: MeshInstance3D
 var door_left: AnimatableBody3D
 var door_right: AnimatableBody3D
 var prop_spawner: MuseumPropSpawner
 var chests: Array[LootChest] = []
 var void_shrines: Array[VoidShrine] = []
+var exit_seals: Array[ExitSeal] = []
 
 func _ready() -> void:
 	_build_environment()
 
 func _process(delta: float) -> void:
 	pulse += delta
-	if is_instance_valid(seal_material):
+	if extraction_unlocked and is_instance_valid(seal_material):
 		seal_material.emission_energy_multiplier = 2.0 + sin(pulse * 4.0) * 0.45
 	var target_gap := 1.35 if extraction_unlocked else 0.0
 	door_left.position.z = lerpf(door_left.position.z, -1.05 - target_gap, delta * 3.0)
@@ -27,6 +29,8 @@ func _process(delta: float) -> void:
 
 func set_extraction_unlocked(value: bool) -> void:
 	extraction_unlocked = value
+	if is_instance_valid(seal_visual):
+		seal_visual.visible = value
 
 func contains_extraction(point: Vector3) -> bool:
 	return extraction_unlocked and absf(point.x - EXTRACTION_CENTER.x) < 1.6 and absf(point.z) < 2.4
@@ -53,12 +57,14 @@ func _build_environment() -> void:
 	prop_spawner.populate()
 	chests = prop_spawner.chests
 	_build_void_shrines()
+	_build_exit_seals()
 	_build_exit()
 
 func reset_chests() -> void:
 	prop_spawner.reset_chests()
 	for shrine: VoidShrine in void_shrines:
 		shrine.reset()
+	_reset_exit_seals()
 
 func _build_zone_floors() -> void:
 	_create_box("MainHall", Vector3(80.0, 0.055, 15.0), Vector3(0.0, 0.028, 0.0), Color("332147"), false, 0.1)
@@ -102,12 +108,12 @@ func _build_vertical_partition(x: float, start_z: float, end_z: float, door_z: f
 func _create_wall_segment_x(start_x: float, end_x: float, z: float) -> void:
 	if end_x - start_x <= 0.2:
 		return
-	_create_box("RoomWall", Vector3(end_x - start_x, 1.5, 0.42), Vector3((start_x + end_x) * 0.5, 0.75, z), Color("39254b"), true, 0.16)
+	_create_box("RoomWall", Vector3(end_x - start_x, 3.4, 0.42), Vector3((start_x + end_x) * 0.5, 1.7, z), Color("39254b"), true, 0.16)
 
 func _create_wall_segment_z(start_z: float, end_z: float, x: float) -> void:
 	if end_z - start_z <= 0.2:
 		return
-	_create_box("RoomWall", Vector3(0.42, 1.5, end_z - start_z), Vector3(x, 0.75, (start_z + end_z) * 0.5), Color("39254b"), true, 0.16)
+	_create_box("RoomWall", Vector3(0.42, 3.4, end_z - start_z), Vector3(x, 1.7, (start_z + end_z) * 0.5), Color("39254b"), true, 0.16)
 
 func _create_door_posts(position: Vector3, rotated: bool) -> void:
 	var offset := Vector3(1.58, 0.0, 0.0) if not rotated else Vector3(0.0, 0.0, 1.58)
@@ -175,23 +181,41 @@ func _build_void_shrines() -> void:
 		void_shrines.append(shrine)
 		add_child(shrine)
 
+func _build_exit_seals() -> void:
+	for index: int in range(GameConstants.EXIT_SEAL_COUNT):
+		var seal := ExitSeal.new()
+		seal.configure(index)
+		exit_seals.append(seal)
+		add_child(seal)
+	_reset_exit_seals()
+
+func _reset_exit_seals() -> void:
+	if exit_seals.is_empty():
+		return
+	var placements: Array[Vector3] = MuseumLayout.SEAL_POINTS.duplicate()
+	placements.shuffle()
+	for index: int in range(exit_seals.size()):
+		exit_seals[index].position = placements[index]
+		exit_seals[index].reset()
+
 func _build_exit() -> void:
 	door_left = _create_door("ExitDoorLeft", -1.05)
 	door_right = _create_door("ExitDoorRight", 1.05)
-	var seal := MeshInstance3D.new()
+	seal_visual = MeshInstance3D.new()
 	var torus := TorusMesh.new()
 	torus.inner_radius = 0.65
 	torus.outer_radius = 0.83
 	torus.rings = 32
 	torus.ring_segments = 10
-	seal.mesh = torus
-	seal.position = Vector3(39.72, 2.0, 0.0)
-	seal.rotation.z = PI * 0.5
-	seal_material = _material(Color("ff4267"), 0.4, 0.3)
+	seal_visual.mesh = torus
+	seal_visual.position = Vector3(39.72, 2.0, 0.0)
+	seal_visual.rotation.z = PI * 0.5
+	seal_visual.visible = false
+	seal_material = _material(Color("53ffc8"), 0.4, 0.3)
 	seal_material.emission_enabled = true
-	seal_material.emission = Color("ff234f")
-	seal.material_override = seal_material
-	add_child(seal)
+	seal_material.emission = Color("53ffc8")
+	seal_visual.material_override = seal_material
+	add_child(seal_visual)
 
 func _create_door(name: String, z_position: float) -> AnimatableBody3D:
 	var body := AnimatableBody3D.new()
@@ -202,7 +226,7 @@ func _create_door(name: String, z_position: float) -> AnimatableBody3D:
 	var mesh := BoxMesh.new()
 	mesh.size = Vector3(0.45, 3.6, 2.0)
 	mesh_instance.mesh = mesh
-	mesh_instance.material_override = _material(Color("5a3a70"), 0.62, 0.3)
+	mesh_instance.material_override = _material(Color("39254b"), 0.24, 0.42)
 	body.add_child(mesh_instance)
 	var collider := CollisionShape3D.new()
 	var shape := BoxShape3D.new()

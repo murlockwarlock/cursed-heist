@@ -354,11 +354,43 @@ BUILDERS = {
 }
 
 
+def optimize_mesh_hierarchy():
+    mesh_objects = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
+    for obj in mesh_objects:
+        bpy.context.view_layer.objects.active = obj
+        obj.select_set(True)
+        for modifier in list(obj.modifiers):
+            bpy.ops.object.modifier_apply(modifier=modifier.name)
+        obj.select_set(False)
+    parents = [obj for obj in bpy.context.scene.objects if obj.type == "EMPTY"]
+    parents.sort(key=hierarchy_depth, reverse=True)
+    for parent in parents:
+        children = [obj for obj in parent.children if obj.type == "MESH"]
+        if len(children) < 2:
+            continue
+        bpy.ops.object.select_all(action="DESELECT")
+        for child in children:
+            child.select_set(True)
+        bpy.context.view_layer.objects.active = children[0]
+        bpy.ops.object.join()
+        children[0].name = f"{parent.name}Mesh"
+
+
+def hierarchy_depth(obj):
+    depth = 0
+    current = obj.parent
+    while current is not None:
+        depth += 1
+        current = current.parent
+    return depth
+
+
 def export_assets():
     os.makedirs(MODEL_DIR, exist_ok=True)
     for name, builder in BUILDERS.items():
         reset_scene()
         builder()
+        optimize_mesh_hierarchy()
         bpy.ops.export_scene.gltf(filepath=os.path.join(MODEL_DIR, f"{name}.glb"), export_format="GLB")
 
 

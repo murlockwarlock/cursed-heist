@@ -1,6 +1,7 @@
 class_name BotDirector
 extends Node
 
+const SimulationAuthorityScript = preload("res://core/simulation_authority.gd")
 var players: Array[HeistPlayer] = []
 var artifact: CursedArtifact
 var round_director: RoundDirector
@@ -13,7 +14,7 @@ func configure(assigned_players: Array[HeistPlayer], assigned_artifact: CursedAr
 	round_director = assigned_round_director
 
 func _process(delta: float) -> void:
-	if not enabled:
+	if not enabled or not SimulationAuthorityScript.can_mutate(self):
 		return
 	action_seconds = maxf(action_seconds - delta, 0.0)
 	for player: HeistPlayer in players:
@@ -27,7 +28,7 @@ func reset() -> void:
 
 func _update_bot(player: HeistPlayer) -> void:
 	if artifact.carrier == player:
-		var escape_target := HeistArena.EXTRACTION_CENTER if round_director.extraction_unlocked else Vector3(-6.0 + player.player_index * 10.0, 0.0, -4.0 + float(player.player_index % 2) * 8.0)
+		var escape_target := HeistArena.EXTRACTION_CENTER if round_director.extraction_unlocked else round_director.next_seal_position(player.global_position)
 		player.set_bot_target(MuseumRoutePlanner.next_target(player.global_position, escape_target))
 	elif artifact.carrier == null:
 		player.set_bot_target(MuseumRoutePlanner.next_target(player.global_position, artifact.global_position))

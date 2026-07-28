@@ -12,6 +12,7 @@ func _run() -> void:
 		await physics_frame
 	game.audio.streams.clear()
 	var player: HeistPlayer = game.players[0]
+	var spawn_before := player.global_position
 	game.artifact.global_position = player.global_position + Vector3.FORWARD
 	if not game.artifact.pick_up(player):
 		push_error("Artifact pickup failed")
@@ -27,14 +28,22 @@ func _run() -> void:
 		await process_frame
 		quit(1)
 		return
-	player.revive()
-	if player.is_ghost or player.health != GameConstants.MAX_HEALTH:
-		push_error("Revive did not restore player state")
+	player.respawn_seconds = 0.04
+	for frame: int in range(8):
+		await physics_frame
+	if player.is_ghost or player.health != GameConstants.MAX_HEALTH or player.global_position == spawn_before:
+		push_error("Timed respawn did not restore the player at a new spawn")
 		game.queue_free()
 		await process_frame
 		quit(1)
 		return
-	print("Combat flow: pickup, defeat, ghost, revive")
+	if player.spawn_protection_seconds <= 0.0:
+		push_error("Respawn did not grant temporary protection")
+		game.queue_free()
+		await process_frame
+		quit(1)
+		return
+	print("Combat flow: pickup, defeat, ghost, safe respawn")
 	for frame: int in range(20):
 		await physics_frame
 	game.audio.stop_all()

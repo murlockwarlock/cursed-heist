@@ -87,6 +87,9 @@ msgstr "RMB · PICK UP ARTIFACT"
 msgid "PROMPT_THROW"
 msgstr "RMB · THROW / PASS"
 
+msgid "PROMPT_BREAK_SEAL"
+msgstr "SEAL · HOLD YOUR GROUND"
+
 msgid "PROMPT_STEAL"
 msgstr "LMB · ATTACK TO STEAL"
 
@@ -129,14 +132,35 @@ msgstr "FOAMED · %d S"
 msgid "STATUS_STAGGERED"
 msgstr "STAGGERED"
 
+msgid "STATUS_PROTECTED"
+msgstr "SHIELD · %d S"
+
+msgid "STATUS_RESPAWNING"
+msgstr "RESPAWN · %d S"
+
+msgid "WORLD_RESPAWN"
+msgstr "GHOST · %d S"
+
+msgid "ARTIFACT_STATUS"
+msgstr "GRIP %d%% · HEAT %d%%"
+
 msgid "OBJECTIVE_FIND_ARTIFACT"
 msgstr "FIND THE LIVING ARTIFACT"
 
 msgid "OBJECTIVE_BREAK_SEALS"
-msgstr "HOLD THE ARTIFACT · EXIT SEALS %d/%d"
+msgstr "BREAK THE MUSEUM SEALS · %d/%d"
 
-msgid "OBJECTIVE_STEAL_FROM"
-msgstr "STEAL THE ARTIFACT FROM %s"
+msgid "EXIT_SEAL_LABEL"
+msgstr "EXIT SEAL"
+
+msgid "EXIT_SEAL_BROKEN"
+msgstr "SEAL BROKEN"
+
+msgid "OBJECTIVE_STEAL_ARTIFACT"
+msgstr "FIND THE CARRIER AND BREAK THEIR GRIP"
+
+msgid "OBJECTIVE_RESPAWN"
+msgstr "GHOST · RESPAWN IN %d S"
 
 msgid "OBJECTIVE_ESCAPE"
 msgstr "EXIT OPEN · REACH THE EAST VAULT"

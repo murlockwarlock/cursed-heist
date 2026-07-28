@@ -2,12 +2,15 @@ class_name CursedArtifact
 extends RigidBody3D
 
 signal carrier_changed(previous: HeistPlayer, current: HeistPlayer)
+signal grip_changed(value: float)
 
 var carrier: HeistPlayer
 var last_carrier: HeistPlayer
 var pickup_lock := 0.0
 var pulse := 0.0
 var heat := 0.0
+var grip := GameConstants.ARTIFACT_GRIP_MAX
+var grip_recovery_delay := 0.0
 var beacon: Node3D
 
 func _ready() -> void:
@@ -28,9 +31,13 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	pulse += delta
 	pickup_lock = maxf(pickup_lock - delta, 0.0)
+	grip_recovery_delay = maxf(grip_recovery_delay - delta, 0.0)
 	if is_instance_valid(carrier):
 		global_position = carrier.global_position + carrier.facing * 0.82 + Vector3.UP * 1.08
 		rotation.y += delta * 2.4
+		if grip_recovery_delay <= 0.0 and grip < GameConstants.ARTIFACT_GRIP_MAX:
+			grip = minf(grip + delta * 10.0, GameConstants.ARTIFACT_GRIP_MAX)
+			grip_changed.emit(grip)
 	beacon.visible = not is_instance_valid(carrier)
 
 func pick_up(player: HeistPlayer) -> bool:
@@ -41,11 +48,25 @@ func pick_up(player: HeistPlayer) -> bool:
 	var previous := carrier
 	last_carrier = player
 	carrier = player
+	grip = GameConstants.ARTIFACT_GRIP_MAX
+	grip_recovery_delay = 0.0
 	player.carried_artifact = self
 	freeze = true
 	linear_velocity = Vector3.ZERO
 	carrier_changed.emit(previous, carrier)
+	grip_changed.emit(grip)
 	return true
+
+func damage_grip(player: HeistPlayer, amount: float, throw_velocity: Vector3) -> bool:
+	if carrier != player or amount <= 0.0:
+		return false
+	grip = maxf(grip - amount, 0.0)
+	grip_recovery_delay = 1.1
+	grip_changed.emit(grip)
+	if grip <= 0.0:
+		drop(throw_velocity)
+		return true
+	return false
 
 func drop(throw_velocity: Vector3) -> void:
 	if not is_instance_valid(carrier):
@@ -56,6 +77,7 @@ func drop(throw_velocity: Vector3) -> void:
 	carrier = null
 	freeze = false
 	pickup_lock = 0.45
+	grip = GameConstants.ARTIFACT_GRIP_MAX
 	linear_velocity = throw_velocity
 	carrier_changed.emit(previous, null)
 
@@ -69,6 +91,9 @@ func reset_to(position: Vector3) -> void:
 	angular_velocity = Vector3.ZERO
 	global_position = position
 	pickup_lock = 0.5
+	grip = GameConstants.ARTIFACT_GRIP_MAX
+	grip_recovery_delay = 0.0
+	grip_changed.emit(grip)
 
 func _build_visual() -> void:
 	var core := MeshInstance3D.new()
@@ -124,7 +149,7 @@ func _build_visual() -> void:
 	label.text = tr(&"ARTIFACT_LABEL")
 	label.position.y = 1.25
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.no_depth_test = true
+	label.no_depth_test = false
 	label.font_size = 48
 	label.pixel_size = 0.006
 	label.modulate = Color("fff0c2")

@@ -48,6 +48,17 @@ func _run() -> void:
 	if not is_equal_approx(target.movement_speed_multiplier(), HeistPlayer.FOAM_SPEED_FACTOR):
 		await _fail("Movement slows stacked below the strongest active effect")
 		return
+	target.clear_curses()
+	if not game.artifact.pick_up(target):
+		await _fail("Target could not pick up the artifact for grip test")
+		return
+	if game.artifact.damage_grip(target, 40.0, Vector3.RIGHT * 4.0):
+		await _fail("A single hit broke full artifact grip")
+		return
+	game.artifact.damage_grip(target, 30.0, Vector3.RIGHT * 4.0)
+	if not game.artifact.damage_grip(target, 30.0, Vector3.RIGHT * 4.0) or game.artifact.carrier != null:
+		await _fail("Accumulated grip damage did not release the artifact")
+		return
 	print("Weapons: baton, blunderbuss and foam sprayer verified")
 	for frame: int in range(20):
 		await physics_frame

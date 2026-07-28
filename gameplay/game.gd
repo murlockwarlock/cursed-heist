@@ -1,5 +1,7 @@
 extends Node3D
 
+const RespawnSystemScript = preload("res://gameplay/systems/respawn_system.gd")
+const SimulationAuthorityScript = preload("res://core/simulation_authority.gd")
 const PLAYER_COLORS: Array[Color] = [Color("ff4d61"), Color("36d3ff"), Color("ffd43b"), Color("87f558")]
 const SPAWN_POINTS: Array[Vector3] = [Vector3(-36.0, 0.1, -2.4), Vector3(-36.0, 0.1, 2.4), Vector3(-31.0, 0.1, -2.4), Vector3(-31.0, 0.1, 2.4)]
 const ARTIFACT_SPAWN := HeistArena.ARTIFACT_HOME
@@ -15,6 +17,7 @@ var interactions: InteractionSystem
 var combat: CombatSystem
 var round_director: RoundDirector
 var bot_director: BotDirector
+var respawn_system: Node
 var players: Array[HeistPlayer] = []
 var round_finished := false
 var restart_key_down := false
@@ -33,7 +36,7 @@ func _ready() -> void:
 	recorder.configure(players.size())
 	add_child(recorder)
 	interactions = InteractionSystem.new()
-	interactions.configure(players, artifact, arena.chests, arena.void_shrines, recorder, audio)
+	interactions.configure(players, artifact, arena.chests, arena.void_shrines, arena.exit_seals, recorder, audio)
 	add_child(interactions)
 	for shrine: VoidShrine in arena.void_shrines:
 		shrine.activated.connect(_on_void_activated)
@@ -41,6 +44,10 @@ func _ready() -> void:
 	combat.configure(players, artifact, recorder, audio)
 	combat.ghost_haunted.connect(_on_ghost_haunted)
 	add_child(combat)
+	respawn_system = RespawnSystemScript.new()
+	respawn_system.configure(players, artifact)
+	respawn_system.player_respawned.connect(_on_player_respawned)
+	add_child(respawn_system)
 	round_director = RoundDirector.new()
 	round_director.configure(players, arena, artifact, combat, recorder, audio)
 	round_director.completed.connect(_on_round_completed)
@@ -53,7 +60,7 @@ func _ready() -> void:
 	curse_system.curse_applied.connect(_on_curse_applied)
 	add_child(curse_system)
 	hud = HeistHud.new()
-	hud.configure(artifact, arena.void_shrines)
+	hud.configure(artifact, arena.void_shrines, arena.exit_seals)
 	add_child(hud)
 	camera_rig = HeistCamera.new()
 	camera_rig.target = players[0]
@@ -100,6 +107,7 @@ func reset_round() -> void:
 		player.velocity = Vector3.ZERO
 		player.score = 0.0
 		player.stun_seconds = 0.0
+		player.spawn_protection_seconds = 0.0
 		player.revive()
 		player.clear_curses()
 	curse_system.reset()
@@ -107,6 +115,7 @@ func reset_round() -> void:
 	interactions.enabled = true
 	arena.reset_chests()
 	combat.enabled = true
+	respawn_system.reset()
 	bot_director.reset()
 	round_director.reset()
 	hud.hide_result()
@@ -118,6 +127,7 @@ func finish_round(winner: HeistPlayer, reason: String) -> void:
 	round_director.enabled = false
 	interactions.enabled = false
 	combat.enabled = false
+	respawn_system.enabled = false
 	bot_director.enabled = false
 	for player: HeistPlayer in players:
 		player.velocity = Vector3.ZERO
@@ -155,7 +165,12 @@ func _on_round_completed(winner: HeistPlayer, reason: StringName) -> void:
 func _on_ghost_haunted(_player: HeistPlayer) -> void:
 	round_director.artifact_heat = minf(round_director.artifact_heat + 0.08, 0.95)
 
+func _on_player_respawned(_player: HeistPlayer) -> void:
+	audio.play(&"pickup", 1.58)
+
 func _on_void_activated(_shrine: VoidShrine, player: HeistPlayer, reward: StringName) -> void:
+	if not SimulationAuthorityScript.can_mutate(self):
+		return
 	match reward:
 		&"time":
 			round_director.add_time(20.0)

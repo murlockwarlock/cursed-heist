@@ -13,6 +13,14 @@ func _run() -> void:
 	if game.arena.chests.size() != MuseumLayout.CHESTS.size():
 		await _fail("Chest layout did not spawn completely")
 		return
+	if game.arena.extraction_unlocked or game.arena.seal_visual.visible:
+		await _fail("Extraction was visually revealed before unlock")
+		return
+	game.arena.set_extraction_unlocked(true)
+	if not game.arena.seal_visual.visible:
+		await _fail("Extraction seal did not appear after unlock")
+		return
+	game.arena.set_extraction_unlocked(false)
 	var player: HeistPlayer = game.players[0]
 	var chest: LootChest = game.arena.chests[0]
 	player.take_damage(40.0)

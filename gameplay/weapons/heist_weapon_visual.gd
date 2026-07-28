@@ -4,11 +4,16 @@ extends Node3D
 var weapon_id: StringName
 var accent := Color.WHITE
 var attack_tween: Tween
+var rest_position := Vector3.ZERO
+var view_model_mode := false
 
-func configure(id: StringName, color: Color) -> void:
+func configure(id: StringName, color: Color, first_person := false) -> void:
 	weapon_id = id
 	accent = color
-	position = Vector3(0.5, 1.0, -0.48)
+	view_model_mode = first_person
+	position = Vector3(0.46, -0.42, -1.0) if first_person else Vector3(0.5, 1.0, -0.48)
+	scale = Vector3.ONE * 0.52 if first_person else Vector3.ONE
+	rest_position = position
 	match weapon_id:
 		WeaponCatalog.BATON:
 			_build_baton()
@@ -21,12 +26,12 @@ func play_attack() -> void:
 	if is_instance_valid(attack_tween):
 		attack_tween.kill()
 	rotation.x = 0.0
-	position.z = -0.48
+	position = rest_position
 	attack_tween = create_tween()
 	attack_tween.tween_property(self, "rotation:x", -0.55, 0.08)
-	attack_tween.parallel().tween_property(self, "position:z", -0.78, 0.08)
+	attack_tween.parallel().tween_property(self, "position:z", rest_position.z - 0.3, 0.08)
 	attack_tween.tween_property(self, "rotation:x", 0.0, 0.16)
-	attack_tween.parallel().tween_property(self, "position:z", -0.48, 0.16)
+	attack_tween.parallel().tween_property(self, "position:z", rest_position.z, 0.16)
 
 func _build_baton() -> void:
 	_add_cylinder(Vector3.ZERO, 0.075, 0.9, Color("3a273f"), Vector3(PI * 0.5, 0.0, 0.0))
@@ -72,6 +77,7 @@ func _add_mesh(mesh: PrimitiveMesh, mesh_position: Vector3, color: Color, mesh_r
 	material.albedo_color = color
 	material.metallic = 0.35
 	material.roughness = 0.34
+	material.no_depth_test = view_model_mode
 	if emission:
 		material.emission_enabled = true
 		material.emission = color

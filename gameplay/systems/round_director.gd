@@ -1,6 +1,7 @@
 class_name RoundDirector
 extends Node
 
+const SimulationAuthorityScript = preload("res://core/simulation_authority.gd")
 signal completed(winner: HeistPlayer, reason: StringName)
 
 var players: Array[HeistPlayer] = []
@@ -24,14 +25,17 @@ func configure(assigned_players: Array[HeistPlayer], assigned_arena: HeistArena,
 	recorder = assigned_recorder
 	audio = assigned_audio
 	artifact.carrier_changed.connect(_on_carrier_changed)
+	for seal: ExitSeal in arena.exit_seals:
+		seal.broken.connect(_on_seal_broken)
 
 func _process(delta: float) -> void:
-	if not enabled:
+	if not enabled or not SimulationAuthorityScript.can_mutate(self):
 		return
 	time_left = maxf(time_left - delta, 0.0)
 	if is_instance_valid(artifact.carrier):
 		_process_carrier(delta, artifact.carrier)
 	else:
+		_update_seals(null, delta)
 		artifact_heat = maxf(artifact_heat - delta * 0.04, 0.0)
 		artifact.heat = artifact_heat
 	if not arena.safe_artifact_position(artifact.global_position):
@@ -54,7 +58,19 @@ func add_time(seconds: float) -> void:
 	time_left = minf(time_left + seconds, GameConstants.ROUND_SECONDS + 60.0)
 
 func seals_broken() -> int:
-	return mini(int(artifact_charge / (GameConstants.EXTRACTION_CHARGE / GameConstants.EXIT_SEAL_COUNT)), GameConstants.EXIT_SEAL_COUNT)
+	return mini(int(artifact_charge), GameConstants.EXIT_SEAL_COUNT)
+
+func next_seal_position(from: Vector3) -> Vector3:
+	var target := from
+	var distance := INF
+	for seal: ExitSeal in arena.exit_seals:
+		if seal.is_broken:
+			continue
+		var candidate_distance := from.distance_to(seal.global_position)
+		if candidate_distance < distance:
+			distance = candidate_distance
+			target = seal.global_position
+	return target
 
 func _process_carrier(delta: float, carrier: HeistPlayer) -> void:
 	artifact_heat = minf(artifact_heat + delta / 8.0, 1.0)
@@ -62,17 +78,28 @@ func _process_carrier(delta: float, carrier: HeistPlayer) -> void:
 	recorder.increment(carrier, &"carry_seconds", delta)
 	var charge_rate := 2.6 if carrier.emote_name == &"dance" and carrier.emote_seconds > 0.0 else 1.0
 	carrier.score += delta * charge_rate
-	artifact_charge += delta * charge_rate
-	if artifact_charge >= GameConstants.EXTRACTION_CHARGE and not extraction_unlocked:
-		extraction_unlocked = true
-		arena.set_extraction_unlocked(true)
-		audio.play(&"unlock")
+	_update_seals(carrier, delta * charge_rate)
 	if extraction_unlocked and arena.contains_extraction(carrier.global_position):
 		completed.emit(carrier, &"WIN_EXTRACTION")
 	if artifact_heat >= 1.0:
 		artifact_heat = 0.16
 		artifact.heat = artifact_heat
 		combat.explode_artifact(carrier)
+
+func _update_seals(carrier: HeistPlayer, delta: float) -> void:
+	for seal: ExitSeal in arena.exit_seals:
+		seal.update_carrier(carrier, delta)
+
+func _on_seal_broken(_seal: ExitSeal, player: HeistPlayer) -> void:
+	artifact_charge = minf(artifact_charge + 1.0, GameConstants.EXIT_SEAL_COUNT)
+	player.score += 4.0
+	recorder.increment(player, &"seals")
+	recorder.record(&"seal_broken", player)
+	audio.play(&"curse", 1.12 + artifact_charge * 0.08)
+	if artifact_charge >= GameConstants.EXIT_SEAL_COUNT and not extraction_unlocked:
+		extraction_unlocked = true
+		arena.set_extraction_unlocked(true)
+		audio.play(&"unlock")
 
 func _highest_scoring_player() -> HeistPlayer:
 	var winner := players[0]

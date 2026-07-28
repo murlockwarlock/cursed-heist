@@ -93,7 +93,7 @@ func _build_visual() -> void:
 	label = Label3D.new()
 	label.position.y = 1.75
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.no_depth_test = true
+	label.no_depth_test = false
 	label.font_size = 42
 	label.pixel_size = 0.006
 	label.outline_size = 9

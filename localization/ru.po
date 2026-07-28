@@ -87,6 +87,9 @@ msgstr "ПКМ · ВЗЯТЬ АРТЕФАКТ"
 msgid "PROMPT_THROW"
 msgstr "ПКМ · БРОСИТЬ / ПЕРЕДАТЬ"
 
+msgid "PROMPT_BREAK_SEAL"
+msgstr "ПЕЧАТЬ · УДЕРЖИВАЙ ПОЗИЦИЮ"
+
 msgid "PROMPT_STEAL"
 msgstr "ЛКМ · АТАКОВАТЬ И ОТНЯТЬ"
 
@@ -129,14 +132,35 @@ msgstr "В ПЕНЕ · %d С"
 msgid "STATUS_STAGGERED"
 msgstr "ПОШАТНУЛСЯ"
 
+msgid "STATUS_PROTECTED"
+msgstr "ЩИТ · %d С"
+
+msgid "STATUS_RESPAWNING"
+msgstr "ВОЗРОЖДЕНИЕ · %d С"
+
+msgid "WORLD_RESPAWN"
+msgstr "ПРИЗРАК · %d С"
+
+msgid "ARTIFACT_STATUS"
+msgstr "ХВАТ %d%% · ЖАР %d%%"
+
 msgid "OBJECTIVE_FIND_ARTIFACT"
 msgstr "НАЙДИ ЖИВОЙ АРТЕФАКТ"
 
 msgid "OBJECTIVE_BREAK_SEALS"
-msgstr "УДЕРЖИВАЙ АРТЕФАКТ · ПЕЧАТИ ВЫХОДА %d/%d"
+msgstr "РАЗРУШЬ ПЕЧАТИ МУЗЕЯ · %d/%d"
 
-msgid "OBJECTIVE_STEAL_FROM"
-msgstr "ОТБЕРИ АРТЕФАКТ У %s"
+msgid "EXIT_SEAL_LABEL"
+msgstr "ПЕЧАТЬ ВЫХОДА"
+
+msgid "EXIT_SEAL_BROKEN"
+msgstr "ПЕЧАТЬ РАЗРУШЕНА"
+
+msgid "OBJECTIVE_STEAL_ARTIFACT"
+msgstr "НАЙДИ НОСИТЕЛЯ И СОРВИ ЕГО ХВАТ"
+
+msgid "OBJECTIVE_RESPAWN"
+msgstr "ПРИЗРАК · ВОЗРОЖДЕНИЕ ЧЕРЕЗ %d С"
 
 msgid "OBJECTIVE_ESCAPE"
 msgstr "ВЫХОД ОТКРЫТ · БЕГИ В ВОСТОЧНОЕ ХРАНИЛИЩЕ"
