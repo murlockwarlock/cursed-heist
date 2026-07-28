@@ -71,3 +71,36 @@ msgstr "ЖАДНЫЕ РУКИ"
 
 msgid "TITLE_TOURIST"
 msgstr "ТУРИСТ"
+
+msgid "TITLE_TREASURE_HUNTER"
+msgstr "СУНДУЧНЫЙ ГОБЛИН"
+
+msgid "HEALTH_LABEL"
+msgstr "HP %d"
+
+msgid "GHOST_LABEL"
+msgstr "ПРИЗРАК"
+
+msgid "PROMPT_PICKUP"
+msgstr "ПКМ · ВЗЯТЬ АРТЕФАКТ"
+
+msgid "PROMPT_THROW"
+msgstr "ПКМ · БРОСИТЬ / ПЕРЕДАТЬ"
+
+msgid "PROMPT_STEAL"
+msgstr "ЛКМ · ТОЛКНУТЬ И ОТНЯТЬ"
+
+msgid "PROMPT_GHOST"
+msgstr "ПРИЗРАК · F ЧТОБЫ ПУГАТЬ"
+
+msgid "ARTIFACT_LABEL"
+msgstr "ПРОКЛЯТЫЙ АРТЕФАКТ\nПКМ ЧТОБЫ ВЗЯТЬ"
+
+msgid "PROMPT_FIND"
+msgstr "ИЩИ ФИОЛЕТОВЫЙ МАЯК · %d м"
+
+msgid "PROMPT_CHASE"
+msgstr "АРТЕФАКТ У %s · ДОГОНИ ЕГО"
+
+msgid "PROMPT_OPEN_CHEST"
+msgstr "ПКМ ОТКРЫТЬ СУНДУК · +HP +ОЧКИ"

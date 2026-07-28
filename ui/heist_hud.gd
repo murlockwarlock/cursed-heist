@@ -4,7 +4,9 @@ extends CanvasLayer
 var title_label: Label
 var status_label: Label
 var controls_label: Label
-var player_labels: Array[Label] = []
+var prompt_label: Label
+var crosshair_label: Label
+var player_cards: Array[PlayerStatusCard] = []
 var overlay: ColorRect
 var result_label: Label
 
@@ -16,9 +18,17 @@ func _ready() -> void:
 	controls_label = _label(Vector2(66.0, 665.0), Vector2(1148.0, 35.0), 14, Color("b8acd1"))
 	controls_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	controls_label.text = tr(&"CONTROLS_HINT")
+	crosshair_label = _label(Vector2(622.0, 342.0), Vector2(36.0, 36.0), 24, Color("fff4c7"))
+	crosshair_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	crosshair_label.text = "+"
+	prompt_label = _label(Vector2(390.0, 554.0), Vector2(500.0, 46.0), 20, Color("fff4c7"))
+	prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	for index: int in range(4):
-		var label := _label(Vector2(82.0 + index * 286.0, 92.0), Vector2(240.0, 52.0), 16, Color.WHITE)
-		player_labels.append(label)
+		var card := PlayerStatusCard.new()
+		card.position = Vector2(20.0 + index * 310.0, 78.0)
+		add_child(card)
+		card.configure([Color("ff4d61"), Color("36d3ff"), Color("ffd43b"), Color("87f558")][index])
+		player_cards.append(card)
 	overlay = ColorRect.new()
 	overlay.color = Color(0.025, 0.015, 0.06, 0.88)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -37,12 +47,10 @@ func update_state(players: Array[HeistPlayer], time_left: float, charge: float, 
 	var state := tr(&"EXIT_OPEN") if unlocked else tr(&"CHARGE_LABEL") % [charge, GameConstants.EXTRACTION_CHARGE]
 	status_label.text = "%s    %s    %02d:%02d" % [state, tr(&"HEAT_LABEL") % int(heat * 100.0), int(time_left) / 60, int(time_left) % 60]
 	for index: int in range(players.size()):
-		var player := players[index]
-		var curse_names: Array[String] = []
-		for id: StringName in player.active_curses:
-			curse_names.append(CurseCatalog.title(id))
-		player_labels[index].text = "%s · %s  %03d\n%s" % [player.player_name, CharacterCatalog.display_name(player.character_id), int(player.score), " · ".join(curse_names)]
-		player_labels[index].add_theme_color_override("font_color", player.body_color.lightened(0.24))
+		player_cards[index].update_player(players[index])
+
+func update_prompt(text: String) -> void:
+	prompt_label.text = text
 
 func show_result(winner: HeistPlayer, reason: String, titles: Array[String]) -> void:
 	overlay.visible = true

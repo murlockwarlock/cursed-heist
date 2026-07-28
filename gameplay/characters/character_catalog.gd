@@ -15,6 +15,13 @@ const NAMES: Dictionary = {
 	ALCHEMIST: "BUBBLES"
 }
 
+const MODELS: Dictionary = {
+	FOX: "res://assets/characters/models/vix.glb",
+	GOLEM: "res://assets/characters/models/bulwark.glb",
+	ILLUSIONIST: "res://assets/characters/models/mirage.glb",
+	ALCHEMIST: "res://assets/characters/models/bubbles.glb"
+}
+
 static func random_order() -> Array[StringName]:
 	var order := ALL.duplicate()
 	order.shuffle()
@@ -22,3 +29,6 @@ static func random_order() -> Array[StringName]:
 
 static func display_name(id: StringName) -> String:
 	return NAMES.get(id, "UNKNOWN")
+
+static func model_path(id: StringName) -> String:
+	return MODELS.get(id, "")

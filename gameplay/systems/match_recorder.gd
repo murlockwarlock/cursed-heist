@@ -9,7 +9,9 @@ func configure(player_count: int) -> void:
 	for index: int in range(player_count):
 		counters.append({
 			"pickups": 0,
+			"catches": 0,
 			"throws": 0,
+			"chests": 0,
 			"shoves": 0,
 			"emotes": 0,
 			"curses": 0,
@@ -53,6 +55,8 @@ func titles(players: Array[HeistPlayer]) -> Array[String]:
 			title = TranslationServer.translate(&"TITLE_CURSE_SPONGE")
 		elif data["throws"] >= 4:
 			title = TranslationServer.translate(&"TITLE_PASS_MASTER")
+		elif data["chests"] >= 2:
+			title = TranslationServer.translate(&"TITLE_TREASURE_HUNTER")
 		elif data["carry_seconds"] >= 20.0:
 			title = TranslationServer.translate(&"TITLE_GREEDY_HANDS")
 		elif data["pickups"] == 0:

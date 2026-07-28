@@ -37,7 +37,21 @@ func animate(pulse: float, movement: float, emote: StringName, emote_seconds: fl
 		left_arm.rotation.z = lerpf(left_arm.rotation.z, 0.0, 0.18)
 		right_arm.rotation.z = lerpf(right_arm.rotation.z, 0.0, 0.18)
 
+func set_ghost_mode(enabled: bool) -> void:
+	for node: Node in find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := node as MeshInstance3D
+		var source := mesh_instance.material_override as StandardMaterial3D
+		if source != null:
+			mesh_instance.material_override = _ghost_material(source, enabled)
+			continue
+		for surface: int in range(mesh_instance.mesh.get_surface_count()):
+			var surface_material := mesh_instance.get_active_material(surface) as StandardMaterial3D
+			if surface_material != null:
+				mesh_instance.set_surface_override_material(surface, _ghost_material(surface_material, enabled))
+
 func _build() -> void:
+	if _build_imported():
+		return
 	body_root = Node3D.new()
 	add_child(body_root)
 	face_root = Node3D.new()
@@ -55,6 +69,53 @@ func _build() -> void:
 			_build_alchemist()
 		_:
 			_build_fox()
+
+func _build_imported() -> bool:
+	var path := CharacterCatalog.model_path(archetype)
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return false
+	var scene := load(path) as PackedScene
+	if scene == null:
+		return false
+	var model := scene.instantiate()
+	add_child(model)
+	body_root = model.find_child("BodyRoot", true, false) as Node3D
+	face_root = model.find_child("FaceRoot", true, false) as Node3D
+	accessory_root = model.find_child("AccessoryRoot", true, false) as Node3D
+	left_leg = model.find_child("LeftLeg", true, false) as Node3D
+	right_leg = model.find_child("RightLeg", true, false) as Node3D
+	left_arm = model.find_child("LeftArm", true, false) as Node3D
+	right_arm = model.find_child("RightArm", true, false) as Node3D
+	if not is_instance_valid(body_root) or not is_instance_valid(face_root) or not is_instance_valid(left_leg) or not is_instance_valid(right_leg) or not is_instance_valid(left_arm) or not is_instance_valid(right_arm):
+		model.free()
+		return false
+	base_height = body_root.position.y
+	_apply_accent(model)
+	return true
+
+func _apply_accent(model: Node) -> void:
+	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := node as MeshInstance3D
+		mesh_instance.mesh = mesh_instance.mesh.duplicate()
+		for surface: int in range(mesh_instance.mesh.get_surface_count()):
+			var source := mesh_instance.mesh.surface_get_material(surface) as StandardMaterial3D
+			if source == null or not source.resource_name.begins_with("Accent_"):
+				continue
+			var customized := source.duplicate() as StandardMaterial3D
+			customized.albedo_color = accent
+			customized.emission_enabled = true
+			customized.emission = accent
+			customized.emission_energy_multiplier = 0.8
+			mesh_instance.set_surface_override_material(surface, customized)
+
+func _ghost_material(source: StandardMaterial3D, enabled: bool) -> StandardMaterial3D:
+	var material := source.duplicate() as StandardMaterial3D
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if enabled else BaseMaterial3D.TRANSPARENCY_DISABLED
+	material.albedo_color.a = 0.34 if enabled else 1.0
+	material.emission_enabled = enabled
+	material.emission = Color("8deaff")
+	material.emission_energy_multiplier = 0.65
+	return material
 
 func _build_fox() -> void:
 	base_height = 0.98

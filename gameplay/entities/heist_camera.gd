@@ -5,14 +5,14 @@ var target: HeistPlayer
 var camera: Camera3D
 var yaw := 0.0
 var pitch := -0.58
-var distance := 11.5
+var distance := 10.5
 var sensitivity := 0.0026
 
 func _ready() -> void:
 	camera = Camera3D.new()
 	camera.fov = 54.0
 	camera.near = 0.12
-	camera.far = 80.0
+	camera.far = 140.0
 	add_child(camera)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -39,3 +39,4 @@ func _physics_process(delta: float) -> void:
 	camera.global_position = camera.global_position.lerp(desired, 1.0 - exp(-delta * 9.0))
 	camera.look_at(focus, Vector3.UP)
 	target.movement_basis = Basis(Vector3.UP, yaw)
+	target.aim_direction = -target.movement_basis.z

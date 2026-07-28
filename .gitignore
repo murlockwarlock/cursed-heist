@@ -2,4 +2,5 @@
 builds/
 *.tmp
 *.log
+*.blend1
 .DS_Store

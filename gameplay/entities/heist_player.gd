@@ -5,6 +5,8 @@ signal interaction_requested(player: HeistPlayer)
 signal shove_requested(player: HeistPlayer)
 signal emote_started(player: HeistPlayer, emote: StringName)
 signal curses_changed(player: HeistPlayer)
+signal health_changed(player: HeistPlayer)
+signal defeated(player: HeistPlayer)
 
 const KEY_PROFILES: Array[Dictionary] = [
 	{"up": KEY_W, "down": KEY_S, "left": KEY_A, "right": KEY_D, "interact": KEY_E, "shove": KEY_Q, "emote": KEY_F},
@@ -19,9 +21,12 @@ var character_id: StringName = CharacterCatalog.FOX
 var body_color := Color.WHITE
 var joy_device := -1
 var score := 0.0
+var health := GameConstants.MAX_HEALTH
+var is_ghost := false
 var carried_artifact: CursedArtifact
 var active_curses: Dictionary[StringName, float] = {}
 var facing := Vector3.FORWARD
+var aim_direction := Vector3.FORWARD
 var stun_seconds := 0.0
 var shove_cooldown := 0.0
 var emote_seconds := 0.0
@@ -72,7 +77,15 @@ func _process(delta: float) -> void:
 	_animate_visual()
 
 func _physics_process(delta: float) -> void:
+	if not is_bot:
+		_poll_actions()
 	var input_vector := _movement_input()
+	if is_ghost:
+		velocity = input_vector * GameConstants.PLAYER_SPEED * 1.18
+		move_and_slide()
+		global_position.y = 0.45 + sin(pulse * 2.6) * 0.12
+		_clamp_to_arena()
+		return
 	if stun_seconds > 0.0:
 		input_vector = Vector3.ZERO
 	if emote_name == &"dance" and emote_seconds > 0.0:
@@ -87,13 +100,38 @@ func _physics_process(delta: float) -> void:
 	velocity.z = horizontal.z
 	if not is_on_floor():
 		velocity.y -= 22.0 * delta
-	else:
+	elif velocity.y <= 0.0:
 		velocity.y = -0.5
 	move_and_slide()
-	global_position.x = clampf(global_position.x, -GameConstants.ARENA_HALF_SIZE.x + 0.8, GameConstants.ARENA_HALF_SIZE.x - 0.8)
-	global_position.z = clampf(global_position.z, -GameConstants.ARENA_HALF_SIZE.y + 0.8, GameConstants.ARENA_HALF_SIZE.y - 0.8)
-	if not is_bot:
-		_poll_actions()
+	_clamp_to_arena()
+
+func take_damage(amount: float) -> void:
+	if is_ghost or amount <= 0.0:
+		return
+	health = maxf(health - amount, 0.0)
+	health_changed.emit(self)
+	if health <= 0.0:
+		is_ghost = true
+		collision_layer = 0
+		collision_mask = 0
+		stun_seconds = 0.0
+		visual.set_ghost_mode(true)
+		defeated.emit(self)
+
+func heal(amount: float) -> void:
+	if is_ghost or amount <= 0.0:
+		return
+	health = minf(health + amount, GameConstants.MAX_HEALTH)
+	health_changed.emit(self)
+
+func revive() -> void:
+	health = GameConstants.MAX_HEALTH
+	is_ghost = false
+	collision_layer = 1
+	collision_mask = 5
+	if is_instance_valid(visual):
+		visual.set_ghost_mode(false)
+	health_changed.emit(self)
 
 func add_curse(id: StringName, duration: float) -> void:
 	active_curses[id] = maxf(active_curses.get(id, 0.0), duration)
@@ -121,10 +159,12 @@ func set_bot_target(target: Vector3) -> void:
 	bot_target = target
 
 func trigger_bot_interaction() -> void:
+	if is_ghost:
+		return
 	interaction_requested.emit(self)
 
 func trigger_bot_shove() -> void:
-	if shove_cooldown <= 0.0:
+	if not is_ghost and shove_cooldown <= 0.0:
 		shove_cooldown = 0.7
 		shove_requested.emit(self)
 
@@ -160,14 +200,14 @@ func _poll_actions() -> void:
 		"emote": Input.is_physical_key_pressed(profile["emote"]) or _joy_pressed(JOY_BUTTON_Y),
 		"jump": Input.is_physical_key_pressed(KEY_SPACE) or _joy_pressed(JOY_BUTTON_B)
 	}
-	if states["interact"] and not _previous_actions["interact"]:
+	if states["interact"] and not _previous_actions["interact"] and not is_ghost:
 		interaction_requested.emit(self)
-	if states["shove"] and not _previous_actions["shove"] and shove_cooldown <= 0.0:
+	if states["shove"] and not _previous_actions["shove"] and shove_cooldown <= 0.0 and not is_ghost:
 		shove_cooldown = 0.7
 		shove_requested.emit(self)
 	if states["emote"] and not _previous_actions["emote"]:
 		begin_emote()
-	if states["jump"] and not _previous_actions["jump"] and is_on_floor() and stun_seconds <= 0.0:
+	if states["jump"] and not _previous_actions["jump"] and is_on_floor() and stun_seconds <= 0.0 and not is_ghost:
 		velocity.y = 8.2
 	_previous_actions = states
 
@@ -203,3 +243,7 @@ func _build_visual() -> void:
 func _animate_visual() -> void:
 	var movement := clampf(Vector2(velocity.x, velocity.z).length() / GameConstants.PLAYER_SPEED, 0.0, 1.0)
 	visual.animate(pulse, movement, emote_name, emote_seconds)
+
+func _clamp_to_arena() -> void:
+	global_position.x = clampf(global_position.x, -GameConstants.ARENA_HALF_SIZE.x + 0.8, GameConstants.ARENA_HALF_SIZE.x - 0.8)
+	global_position.z = clampf(global_position.z, -GameConstants.ARENA_HALF_SIZE.y + 0.8, GameConstants.ARENA_HALF_SIZE.y - 0.8)
