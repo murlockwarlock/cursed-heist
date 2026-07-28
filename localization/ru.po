@@ -1,0 +1,73 @@
+msgid ""
+msgstr ""
+"Language: ru\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "GAME_TITLE"
+msgstr "CURSED HEIST"
+
+msgid "EXIT_LABEL"
+msgstr "ВЫХОД"
+
+msgid "EXIT_OPEN"
+msgstr "ВЫХОД ОТКРЫТ"
+
+msgid "CHARGE_LABEL"
+msgstr "ЗАРЯД %.0f / %.0f"
+
+msgid "HEAT_LABEL"
+msgstr "ЖАР %d%%"
+
+msgid "CONTROLS_HINT"
+msgstr "P1 WASD·E·Q·F    P2 СТРЕЛКИ·ENTER·SHIFT·CTRL    P3 IJKL·O·U·P    P4 Z X C V·B·N·M"
+
+msgid "WINNER_LABEL"
+msgstr "%s ПОБЕДИЛ"
+
+msgid "NEW_MATCH"
+msgstr "ENTER — НОВЫЙ МАТЧ"
+
+msgid "WIN_EXTRACTION"
+msgstr "УНЕС ПРОКЛЯТЫЙ АРТЕФАКТ"
+
+msgid "WIN_POWER"
+msgstr "НАБРАЛ БОЛЬШЕ ВСЕХ ПРОКЛЯТОЙ СИЛЫ"
+
+msgid "CURSE_HEAVY"
+msgstr "ТЯЖЕСТЬ"
+
+msgid "CURSE_GREED"
+msgstr "ЖАДНОСТЬ"
+
+msgid "CURSE_DANCE_FEVER"
+msgstr "ТАНЦЕВАЛЬНАЯ ЧУМА"
+
+msgid "CURSE_ECHO"
+msgstr "ЭХО"
+
+msgid "CURSE_UNKNOWN"
+msgstr "НЕИЗВЕСТНО"
+
+msgid "TITLE_UNPREDICTABLE"
+msgstr "НЕПРЕДСКАЗУЕМЫЙ"
+
+msgid "TITLE_HOT_POTATO_VICTIM"
+msgstr "ЖЕРТВА ГОРЯЧЕЙ КАРТОШКИ"
+
+msgid "TITLE_JUDAS"
+msgstr "ИУДА"
+
+msgid "TITLE_DANCE_KING"
+msgstr "КОРОЛЬ ТАНЦПОЛА"
+
+msgid "TITLE_CURSE_SPONGE"
+msgstr "ПРОКЛЯТАЯ ГУБКА"
+
+msgid "TITLE_PASS_MASTER"
+msgstr "МАСТЕР ПЕРЕДАЧИ"
+
+msgid "TITLE_GREEDY_HANDS"
+msgstr "ЖАДНЫЕ РУКИ"
+
+msgid "TITLE_TOURIST"
+msgstr "ТУРИСТ"

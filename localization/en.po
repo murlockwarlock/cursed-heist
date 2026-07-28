@@ -1,0 +1,73 @@
+msgid ""
+msgstr ""
+"Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "GAME_TITLE"
+msgstr "CURSED HEIST"
+
+msgid "EXIT_LABEL"
+msgstr "EXIT"
+
+msgid "EXIT_OPEN"
+msgstr "EXIT OPEN"
+
+msgid "CHARGE_LABEL"
+msgstr "CHARGE %.0f / %.0f"
+
+msgid "HEAT_LABEL"
+msgstr "HEAT %d%%"
+
+msgid "CONTROLS_HINT"
+msgstr "P1 WASD·E·Q·F    P2 ARROWS·ENTER·SHIFT·CTRL    P3 IJKL·O·U·P    P4 Z X C V·B·N·M"
+
+msgid "WINNER_LABEL"
+msgstr "%s WINS"
+
+msgid "NEW_MATCH"
+msgstr "ENTER — NEW MATCH"
+
+msgid "WIN_EXTRACTION"
+msgstr "ESCAPED WITH THE CURSED ARTIFACT"
+
+msgid "WIN_POWER"
+msgstr "COLLECTED THE MOST CURSED POWER"
+
+msgid "CURSE_HEAVY"
+msgstr "HEAVY"
+
+msgid "CURSE_GREED"
+msgstr "GREED"
+
+msgid "CURSE_DANCE_FEVER"
+msgstr "DANCE FEVER"
+
+msgid "CURSE_ECHO"
+msgstr "ECHO"
+
+msgid "CURSE_UNKNOWN"
+msgstr "UNKNOWN"
+
+msgid "TITLE_UNPREDICTABLE"
+msgstr "UNPREDICTABLE"
+
+msgid "TITLE_HOT_POTATO_VICTIM"
+msgstr "HOT POTATO VICTIM"
+
+msgid "TITLE_JUDAS"
+msgstr "JUDAS"
+
+msgid "TITLE_DANCE_KING"
+msgstr "DANCE FLOOR ROYALTY"
+
+msgid "TITLE_CURSE_SPONGE"
+msgstr "CURSE SPONGE"
+
+msgid "TITLE_PASS_MASTER"
+msgstr "MASTER OF PASSING"
+
+msgid "TITLE_GREEDY_HANDS"
+msgstr "GREEDY HANDS"
+
+msgid "TITLE_TOURIST"
+msgstr "TOURIST"

@@ -1,0 +1,34 @@
+config_version=5
+
+[application]
+
+config/name="Cursed Heist"
+run/main_scene="res://scenes/game.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+boot_splash/bg_color=Color(0.027, 0.02, 0.055, 1)
+boot_splash/image="res://assets/visual/key_art.png"
+boot_splash/fullsize=true
+boot_splash/show_image=true
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/funplay_mcp/plugin.cfg")
+
+[internationalization]
+
+locale/fallback="en"
+locale/translations=PackedStringArray("res://localization/en.po", "res://localization/ru.po")
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
